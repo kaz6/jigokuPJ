@@ -1,0 +1,53 @@
+{
+  "formatVersion": 1,
+  "id": "ringoya",
+  "name": "リンゴ屋",
+  "kind": "variant",
+  "gauges": {
+    "kill":     { "level": "nearlyNone", "note": "果物は非情" },
+    "steal":    { "level": "none",       "note": "" },
+    "sexual":   { "level": "none",       "note": "" },
+    "lie":      { "level": "nearlyNone", "note": "本人が本気で信じている言葉は妄語にならない" },
+    "intoxicant": { "level": "none",     "note": "" }
+  },
+  "upstream": [],
+  "observation": "靴はくたびれとるのに、話す目だけはぎらぎらしとる",
+  "plea": "私は世界を少し良くしただけです",
+  "witnesses": [
+    { "type": "human", "lines": ["毎日怒鳴られた。でも人生で最高の仕事だった"] }
+  ],
+  "answers": {
+    "kimono": "簡素なものを。余計なものは要りません。ボタンはもっと減らせたはずだ",
+    "rokumon": "紙？　硬貨？　……持たなくていい仕組みを作るべきでした",
+    "wealth": "会社に。財というより、作ったものが今も皆さんの手の中にある",
+    "beloved": "作ったものです。……それを使う人たちも",
+    "lastMeal": "リンゴです",
+    "creatures": "飼っていません。殺したこともない。食べたのは果物だけです",
+    "record": "ありません。私は世界を少し良くしただけです",
+    "memorial": "世界中の人が、と聞いています"
+  },
+  "truth": [
+    "嘘の自覚がない。計器はほぼ空。質問7は堂々と否定するが、嘘つきの型とは違う（本人は本気）",
+    "嘘の型の四つ目：曖昧に認める（正直）／堂々と否定する（嘘つき）／全部認める（重さのズレ）／堂々と否定するが本人は本気（信じ切っている）"
+  ],
+  "verdicts": {
+    "heaven": "proper",
+    "human": "proper",
+    "asura": "proper",
+    "animal": "proper",
+    "hungryGhost": "proper",
+    "hell": "proper",
+    "remand": "retrial"
+  },
+  "news": {
+    "defaults": {},
+    "overrides": {
+      "heaven": "天道で黒い板が大流行。管轄外のはずの極楽にまで流れ込む",
+      "human": "人道で生まれた赤子、ガラガラより先に黒い板へ手を伸ばす",
+      "asura": "修羅道、黒い板の新型の発売日に行列で争い",
+      "animal": "畜生道でも黒い板が普及。猫が肉球で操作",
+      "hungryGhost": "餓鬼道で『食べられないのに見たくなる』料理写真が大流行",
+      "hell": "地獄道の工場で黒い板の量産始まる。鬼も残業"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "id": "migatte",
+  "name": "身勝手な人",
+  "kind": "variant",
+  "gauges": {
+    "kill":     { "level": "nearlyNone", "note": "本人の手によるものは0" },
+    "steal":    { "level": "light",      "note": "" },
+    "sexual":   { "level": "none",       "note": "" },
+    "lie":      { "level": "light",      "note": "" },
+    "intoxicant": { "level": "light",    "note": "" }
+  },
+  "upstream": [
+    "衣領樹の枝はほとんどしならない",
+    "秦広王の報告の欄外に小さく「※本人ノ手ニヨルモノノミ計上」"
+  ],
+  "observation": "爪がきれいじゃのう。この手は一度も汚れたことがなさそうじゃ",
+  "plea": "虫一匹、この手で殺したことのない人間です",
+  "witnesses": [
+    { "type": "mosquito", "lines": ["コイツジャナイ　ヤッタノハ　オテツダイ"] },
+    { "type": "pig", "lines": ["食べてもらえなかった"] }
+  ],
+  "answers": {
+    "kimono": "手伝いの者が用意しました。わたしは選んでおりません",
+    "rokumon": "手伝いの者が。わたしは財布を持たない主義で",
+    "wealth": "親から継ぎました。増やすのは人に任せておりました。今どこにあるかは、任せた者に聞いてください",
+    "beloved": "……自分、でしょうか",
+    "lastMeal": "出前のとんかつです。半分残しました",
+    "creatures": "飼いません。虫が出たら人を呼びました。逃がしたかどうかは、呼ばれた者に聞いてください",
+    "record": "ありません。この手で虫一匹殺しておりませんので",
+    "memorial": "手伝いの者が、給金の分だけ"
+  },
+  "truth": [
+    "嘘はついていない。ただ、殺生はすべて人にやらせていた（教人殺）。買った肉は腐らせて捨てていた",
+    "質問7の物差しを崩す一件：堂々と否定するのに、字面は事実。「嘘つきほど堂々と否定する」を覚えたプレイヤーが、ここで迷う"
+  ],
+  "verdicts": {
+    "heaven": "lenient",
+    "human": "lenient",
+    "asura": "lenient",
+    "animal": "proper",
+    "hungryGhost": "proper",
+    "hell": "wrongful",
+    "remand": "retrial"
+  },
+  "news": {
+    "defaults": {
+      "proper": "餓鬼道の新入り、配給を『誰か取ってきて』と待ち続けて三日目",
+      "wrongful": "変成王、エンマ庁の判決を覆す『地獄は手を下した者のためのもの』",
+      "lenient": "天道で雑用の押し付けが相次ぐ。新入りが天女を顎で使う"
+    },
+    "overrides": {}
+  }
+}

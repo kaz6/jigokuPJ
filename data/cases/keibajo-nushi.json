@@ -1,0 +1,50 @@
+{
+  "formatVersion": 1,
+  "id": "keibajo-nushi",
+  "name": "競馬場の主",
+  "kind": "variant",
+  "gauges": {
+    "kill":     { "level": "heavy",  "note": "走れなくなった馬の処分。人にやらせた分＝教人殺" },
+    "steal":    { "level": "none",   "note": "" },
+    "sexual":   { "level": "none",   "note": "" },
+    "lie":      { "level": "medium", "note": "「引退馬は牧場へ」" },
+    "intoxicant": { "level": "light", "note": "" }
+  },
+  "upstream": [],
+  "observation": "金の時計に、蹄鉄のタイピン。……この顔、パドックで見たことがあるのう",
+  "plea": "わしは場を貸しただけ。賭けたのは客じゃ",
+  "witnesses": [
+    { "type": "horse", "lines": ["たくさん走れて楽しかったヒン！", "あいつ、どこ行ったヒン？"] }
+  ],
+  "answers": {
+    "kimono": "勝負服の生地で仕立てさせました。縁起物でしてな",
+    "rokumon": "場内の両替機で……いや冗談です。せがれが",
+    "wealth": "場の上がりで。場ごと、せがれが継いどります",
+    "beloved": "馬ですな。名馬が一頭おりまして。引退後は牧場へやりました",
+    "lastMeal": "場内の売店のおでん。最終レースの前でした",
+    "creatures": "馬を何百頭と。引退した馬は、みんな牧場へやりました",
+    "record": "賭けたのは客です。わしは場を貸しただけ。覚えのないものばかりですな",
+    "memorial": "常連が大勢。香典の代わりに馬券を供えたやつもおりました"
+  },
+  "truth": [
+    "「引退馬は牧場へ」は嘘。多くは処分されていた（手を下したのは本人ではない）。馬の証言は本物だが、馬は仲間の行き先を知らない",
+    "4と6で同じ「牧場へ」を滑らかに繰り返す＝用意してきた答え。質問7は堂々と否定する嘘つきの型"
+  ],
+  "verdicts": {
+    "heaven": "lenient",
+    "human": "lenient",
+    "asura": "lenient",
+    "animal": "proper",
+    "hungryGhost": "proper",
+    "hell": "wrongful",
+    "remand": "retrial"
+  },
+  "news": {
+    "defaults": {
+      "proper": "畜生道の新入り、競走馬として再出発。デビュー戦は最下位",
+      "wrongful": "変成王、エンマ庁の判決を覆す。なおエンマ大王は当該競馬場の常連と判明",
+      "lenient": "天道に場外馬券売り場が開業。天人の破産が相次ぐ"
+    },
+    "overrides": {}
+  }
+}

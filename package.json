@@ -1,0 +1,12 @@
+{
+  "name": "jigokupj",
+  "private": true,
+  "type": "module",
+  "description": "地獄極楽六道縁途（エンド）のモック用リポジトリ",
+  "scripts": {
+    "check-data": "node scripts/check-data.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

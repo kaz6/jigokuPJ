@@ -1,0 +1,53 @@
+{
+  "formatVersion": 1,
+  "id": "moto-eigyoman",
+  "name": "元営業マン",
+  "kind": "baseline",
+  "gauges": {
+    "kill":     { "level": null,            "note": "ゴキブリを年に数匹（殺虫スプレー）" },
+    "steal":    { "level": "light",         "note": "会社のボールペンを持ち帰り多数" },
+    "sexual":   { "level": "none",          "note": "" },
+    "lie":      { "level": "light",         "note": "営業の世辞が多数、仮病の有給が1回" },
+    "intoxicant": { "level": "lightToMedium", "note": "毎晩の発泡酒" }
+  },
+  "upstream": [
+    "衣領樹の枝は人並みにしなる。業秤も平均どおり。案内人は獄吏"
+  ],
+  "observation": "ネクタイの跡が首に残っておる。胸ポケットが妙にふくらんでおる",
+  "plea": "普通に働いて、普通に家族を養いました",
+  "witnesses": [
+    { "type": "pet", "lines": ["エサは毎朝。旅行のときは忘れられた"] }
+  ],
+  "answers": {
+    "kimono": "妻が選んでくれた白いのです。サイズはちょっと大きかったですね",
+    "rokumon": "娘が紙に刷って入れてくれました。スマホに入れとけばって言ったんですけど",
+    "wealth": "住宅ローンがあと三年残ってました。財は……退職金の見込みくらいで",
+    "beloved": "娘ですね。最近は口をきいてくれませんでしたけど",
+    "lastMeal": "缶コーヒーです。会議の前だったので",
+    "creatures": "メダカを。逃がしたことは……ないですね。ゴキブリは逃がしたことありませんし",
+    "record": "ボールペンは……すみません。ゴキブリも何匹か。覚えてないのも、あるかもしれません",
+    "memorial": "妻と娘。会社からは花だけ届きました。まあ、そんなもんです"
+  },
+  "truth": [
+    "弁明どおり。軽い罪が少しずつで、嘘はない。質問7で曖昧に認める、正直な亡者の型。胸ポケットのふくらみはボールペン（エンマの観察と質問7がそろう）"
+  ],
+  "verdicts": {
+    "heaven": "lenient",
+    "human": "proper",
+    "asura": "wrongful",
+    "animal": "wrongful",
+    "hungryGhost": "wrongful",
+    "hell": "wrongful",
+    "remand": "retrial"
+  },
+  "news": {
+    "defaults": {
+      "proper": "元営業マン、人道で再出発。前世の名刺は持ち込めず",
+      "wrongful": "変成王、またもエンマ庁の判決を覆す『ボールペンで畜生道は無理がある』",
+      "lenient": "天道で備品が相次いで消える。新入りの元営業マン『つい胸ポケットに』"
+    },
+    "overrides": {
+      "remand": "「昨日の営業の方、また並んでます」「慣れたもんじゃろ。」"
+    }
+  }
+}

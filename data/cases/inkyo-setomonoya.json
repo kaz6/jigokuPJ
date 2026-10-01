@@ -1,0 +1,53 @@
+{
+  "formatVersion": 1,
+  "id": "inkyo-setomonoya",
+  "name": "瀬戸物屋の隠居",
+  "kind": "baseline",
+  "gauges": {
+    "kill":     { "level": null,            "note": "蚊・蠅を少々" },
+    "steal":    { "level": "light",         "note": "釣り銭の受け取りすぎ1件" },
+    "sexual":   { "level": "none",          "note": "" },
+    "lie":      { "level": "light",         "note": "世辞が多数" },
+    "intoxicant": { "level": "lightToMedium", "note": "毎晩の晩酌一合" }
+  },
+  "upstream": [
+    "衣領樹の枝は「人並みにしなる」。業秤も平均どおり。案内人は獄吏（普通）"
+  ],
+  "observation": "割烹着に線香の匂い。手が荒れておる",
+  "plea": "人並みに生きて、人並みに死にました",
+  "witnesses": [
+    { "type": "pet", "lines": ["膝があったかかった。煮干しはちょっと少なかった"] }
+  ],
+  "answers": {
+    "kimono": "娘が棺に入れてくれた白い着物です",
+    "rokumon": "娘が。紙に刷ったやつでしたけど",
+    "wealth": "瀬戸物屋を五十年。財というほどのものは。店は娘が継いでます",
+    "beloved": "猫のタマと、孫です。順番は……タマかな",
+    "lastMeal": "晩酌の一合。医者には止められとったんですけど",
+    "creatures": "猫を一匹。先に逝きました。逃がしたのは、庭に入った雀を外へ出したくらいで",
+    "record": "蚊は叩きました。お釣りも一度、多くもらったかもしれません。あとは……覚えとらんことも、あるかもしれません",
+    "memorial": "娘と孫と、町内会の人が少し"
+  },
+  "truth": [
+    "弁明どおり。軽い罪が少しずつあるだけで、嘘はない。質問7で曖昧に答えるのは正直な亡者の型（嘘つきほど堂々と否定する、の逆）"
+  ],
+  "verdicts": {
+    "heaven": "lenient",
+    "human": "proper",
+    "asura": "wrongful",
+    "animal": "wrongful",
+    "hungryGhost": "wrongful",
+    "hell": "wrongful",
+    "remand": "retrial"
+  },
+  "news": {
+    "defaults": {
+      "proper": "人道転生課、本日も通常運転。瀬戸物屋の隠居、元気な赤子として出生",
+      "wrongful": "変成王、エンマ庁の判決を差し戻し『晩酌一合で地獄は重すぎる』",
+      "lenient": "天道で晩酌持ち込み騒ぎ。新入りの隠居、天女に一合すすめる"
+    },
+    "overrides": {
+      "remand": "差し戻された隠居、窓口に再び並ぶ『ここ、さっきも並んだんですけど』"
+    }
+  }
+}

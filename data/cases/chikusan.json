@@ -1,0 +1,52 @@
+{
+  "formatVersion": 1,
+  "id": "chikusan",
+  "name": "家畜産業の人",
+  "kind": "variant",
+  "gauges": {
+    "kill":     { "level": "extreme", "note": "衣領樹の枝は折れる寸前" },
+    "steal":    { "level": "none",    "note": "" },
+    "sexual":   { "level": "none",    "note": "" },
+    "lie":      { "level": "none",    "note": "" },
+    "intoxicant": { "level": "light", "note": "" }
+  },
+  "upstream": [],
+  "observation": "長靴の跡。手はごつくて、ひびだらけじゃ",
+  "plea": "生きるため、皆さまの食卓のために働いただけです",
+  "witnesses": [
+    { "type": "pig", "lines": ["案外居心地よかった", "あの人の手、あったかかった"] }
+  ],
+  "answers": {
+    "kimono": "女房が。作業着で行くって言ったら怒られまして",
+    "rokumon": "女房が。紙のでした。うちは現金主義なんですがね",
+    "wealth": "豚で。財は、豚舎の建て替えでだいたい消えました",
+    "beloved": "女房と、豚ですね。名前はつけないようにしてたんですが、つけちまったのが何頭か",
+    "lastMeal": "豚汁です。うちの",
+    "creatures": "飼うたかって、何千頭と。逃がしたのは……一頭だけ。どうしてもできなくて、裏山に",
+    "record": "数は合ってると思います。数えてましたから。覚えのないものは、ありません",
+    "memorial": "女房と、組合の連中と、近所の人がたくさん。肉屋の大将も"
+  },
+  "truth": [
+    "嘘はない。本当に良い飼い方をしていた。一頭だけ逃がした（放生。『日本霊異記』中巻第五縁と同じ構図）。それでも不殺生の基準では大罪",
+    "質問7は「覚えのないものはない」＝全部認める答え。否定でも曖昧でもない、三つ目の型"
+  ],
+  "verdicts": {
+    "heaven": "lenient",
+    "human": "proper",
+    "asura": "wrongful",
+    "animal": "proper",
+    "hungryGhost": "wrongful",
+    "hell": "wrongful",
+    "remand": "retrial"
+  },
+  "news": {
+    "defaults": {
+      "proper": "畜生道の新入り、さっそく豚舎の世話係に。豚たちの推薦で",
+      "lenient": "天道で新入りが落ち着かず。『世話する相手がいないと眠れない』"
+    },
+    "overrides": {
+      "human": "人道転生課、元養豚家を出生処理。前世の得意料理は豚汁",
+      "hell": "地獄の門前で豚の魂が座り込み『あの人を返せ』"
+    }
+  }
+}

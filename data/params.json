@@ -1,0 +1,42 @@
+{
+  "formatVersion": 1,
+  "source": "企画ページ「質問の制限：一日の持ち分」「線香と時間切れ」「強制判決の中身」「誤った差し戻しの扱い」（いずれも 2026-10-01 作者裁定）",
+  "params": {
+    "questionsPerDay": {
+      "value": 30,
+      "unit": "回",
+      "provisional": false,
+      "note": "一日の質問回数（作者裁定では「暫定30回」）。同じ質問はカウントしない"
+    },
+    "incenseSecondsPerQuestion": {
+      "value": 180,
+      "unit": "秒",
+      "provisional": false,
+      "note": "線香：3分ごとに質問回数を1消費。燃えるのは裁判パートの間だけ"
+    },
+    "forcedVerdictGraceSeconds": {
+      "value": 10,
+      "unit": "秒",
+      "provisional": false,
+      "note": "強制判決で行き先を決める持ち時間。超えた分だけ残業代で所持金が減る"
+    },
+    "forcedVerdictRandomSeconds": {
+      "value": 60,
+      "unit": "秒",
+      "provisional": false,
+      "note": "強制判決で1分経過するとランダムな行き先に送られる"
+    },
+    "overtimePayPerSecond": {
+      "value": 1,
+      "unit": "所持金/秒（単位は未定）",
+      "provisional": true,
+      "note": "仮の値。強制判決の持ち時間を超えた1秒ごとに減る残業代。所持金はフレーバーで、マイナスになっても遊びは止まらない"
+    },
+    "earningsPerCase": {
+      "value": 10,
+      "unit": "所持金/件（単位は未定）",
+      "provisional": true,
+      "note": "仮の値。本日の処理件数1件あたりの稼ぎ。差し戻した件は処理件数に含めない"
+    }
+  }
+}
