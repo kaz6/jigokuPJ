@@ -1,22 +1,54 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "id": "inkyo-setomonoya",
   "name": "瀬戸物屋の隠居",
   "kind": "baseline",
   "gauges": {
-    "kill":     { "level": null,            "note": "蚊・蠅を少々" },
-    "steal":    { "level": "light",         "note": "釣り銭の受け取りすぎ1件" },
-    "sexual":   { "level": "none",          "note": "" },
-    "lie":      { "level": "light",         "note": "世辞が多数" },
-    "intoxicant": { "level": "lightToMedium", "note": "毎晩の晩酌一合" }
+    "kill": {
+      "level": "light",
+      "note": "蚊・蠅を少々"
+    },
+    "steal": {
+      "level": "light",
+      "note": "釣り銭の受け取りすぎ1件"
+    },
+    "sexual": {
+      "level": "none",
+      "note": ""
+    },
+    "lie": {
+      "level": "light",
+      "note": "世辞が多数"
+    },
+    "intoxicant": {
+      "level": "lightToMedium",
+      "note": "毎晩の晩酌一合"
+    }
   },
-  "upstream": [
-    "衣領樹の枝は「人並みにしなる」。業秤も平均どおり。案内人は獄吏（普通）"
-  ],
+  "upstream": {
+    "shinko": [],
+    "shoko": [
+      "衣領樹の枝は「人並みにしなる」"
+    ],
+    "sotei": [],
+    "gokan": [
+      "業秤も平均どおり"
+    ],
+    "unsorted": [
+      "案内人は獄吏（普通）"
+    ]
+  },
   "observation": "割烹着に線香の匂い。手が荒れておる",
   "plea": "人並みに生きて、人並みに死にました",
   "witnesses": [
-    { "type": "pet", "lines": ["膝があったかかった。煮干しはちょっと少なかった"] }
+    {
+      "type": "pet",
+      "identity": "猫",
+      "swarm": false,
+      "lines": [
+        "膝があったかかった。煮干しはちょっと少なかった"
+      ]
+    }
   ],
   "answers": {
     "kimono": "娘が棺に入れてくれた白い着物です",
@@ -31,6 +63,12 @@
   "truth": [
     "弁明どおり。軽い罪が少しずつあるだけで、嘘はない。質問7で曖昧に答えるのは正直な亡者の型（嘘つきほど堂々と否定する、の逆）"
   ],
+  "writerNotes": {
+    "notOnGauges": [],
+    "misc": [
+      "証人：擦り寄る火の玉（ペット＝猫。先に死んでいる）"
+    ]
+  },
   "verdicts": {
     "heaven": "lenient",
     "human": "proper",

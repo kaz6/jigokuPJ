@@ -1,22 +1,54 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "id": "moto-eigyoman",
   "name": "元営業マン",
   "kind": "baseline",
   "gauges": {
-    "kill":     { "level": null,            "note": "ゴキブリを年に数匹（殺虫スプレー）" },
-    "steal":    { "level": "light",         "note": "会社のボールペンを持ち帰り多数" },
-    "sexual":   { "level": "none",          "note": "" },
-    "lie":      { "level": "light",         "note": "営業の世辞が多数、仮病の有給が1回" },
-    "intoxicant": { "level": "lightToMedium", "note": "毎晩の発泡酒" }
+    "kill": {
+      "level": "light",
+      "note": "ゴキブリを年に数匹（殺虫スプレー）"
+    },
+    "steal": {
+      "level": "light",
+      "note": "会社のボールペンを持ち帰り多数"
+    },
+    "sexual": {
+      "level": "none",
+      "note": ""
+    },
+    "lie": {
+      "level": "light",
+      "note": "営業の世辞が多数、仮病の有給が1回"
+    },
+    "intoxicant": {
+      "level": "lightToMedium",
+      "note": "毎晩の発泡酒"
+    }
   },
-  "upstream": [
-    "衣領樹の枝は人並みにしなる。業秤も平均どおり。案内人は獄吏"
-  ],
+  "upstream": {
+    "shinko": [],
+    "shoko": [
+      "衣領樹の枝は人並みにしなる"
+    ],
+    "sotei": [],
+    "gokan": [
+      "業秤も平均どおり"
+    ],
+    "unsorted": [
+      "案内人は獄吏"
+    ]
+  },
   "observation": "ネクタイの跡が首に残っておる。胸ポケットが妙にふくらんでおる",
   "plea": "普通に働いて、普通に家族を養いました",
   "witnesses": [
-    { "type": "pet", "lines": ["エサは毎朝。旅行のときは忘れられた"] }
+    {
+      "type": "pet",
+      "identity": "メダカ",
+      "swarm": false,
+      "lines": [
+        "エサは毎朝。旅行のときは忘れられた"
+      ]
+    }
   ],
   "answers": {
     "kimono": "妻が選んでくれた白いのです。サイズはちょっと大きかったですね",
@@ -31,6 +63,12 @@
   "truth": [
     "弁明どおり。軽い罪が少しずつで、嘘はない。質問7で曖昧に認める、正直な亡者の型。胸ポケットのふくらみはボールペン（エンマの観察と質問7がそろう）"
   ],
+  "writerNotes": {
+    "notOnGauges": [],
+    "misc": [
+      "証人：擦り寄るつもりの火の玉（ペット＝メダカ。口をぱくぱくさせて寄ってくる）"
+    ]
+  },
   "verdicts": {
     "heaven": "lenient",
     "human": "proper",
@@ -46,8 +84,6 @@
       "wrongful": "変成王、またもエンマ庁の判決を覆す『ボールペンで畜生道は無理がある』",
       "lenient": "天道で備品が相次いで消える。新入りの元営業マン『つい胸ポケットに』"
     },
-    "overrides": {
-      "remand": "「昨日の営業の方、また並んでます」「慣れたもんじゃろ。」"
-    }
+    "overrides": {}
   }
 }
