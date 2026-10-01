@@ -1,6 +1,6 @@
 # DATA_FORMAT（formatVersion 2）
 
-> 版の履歴：1＝JG-001。2＝JG-001b（上流の報告を王ごとの欄に／証人に正体・群れ／書き手用の注記／「ニュースなし」の印／差し戻しの評価に proper／幕間データ）。DECISION_LOG の D-037・R-006〜 を参照
+> 版の履歴：1＝JG-001。2＝JG-001b（上流の報告を王ごとの欄に／証人に正体・群れ／書き手用の注記／「ニュースなし」の印／差し戻しの評価に proper／幕間データ）。JG-001c（2026-10-01）は版を上げていない：幕間の話し手に `jailer`、タイミングに `afterVerdict` を足しただけで、既存のデータはそのまま読める（R-015）。DECISION_LOG の D-037・D-040・R-006〜 を参照
 
 > データ形式の説明。**一件の台本の形式と判決の記録の形式は不可逆の芯**（ARCHITECTURE_PRINCIPLES 参照）。勝手に変えない。変えるときは formatVersion を上げ、DECISION_LOG に記録する。
 > 選び方（「この評価ならこのニュース」）はコード側（`src/rules.mjs`）、文面はデータ側。条件式を JSON に書かない。
@@ -64,16 +64,20 @@
 ### 上流の王（4人。画面左の4アイコン）
 | id | 王 | 主な報告 |
 |---|---|---|
-| `shinko` | 秦広王（初七日） | |
-| `shoko` | 初江王（二七日） | 衣領樹（三途の川） |
-| `sotei` | 宋帝王（三七日） | |
-| `gokan` | 五官王（四七日） | 業秤 |
+| `shinko` | 秦広王（初七日） | 殺生 |
+| `shoko` | 初江王（二七日） | 衣領樹（三途の川）・盗み |
+| `sotei` | 宋帝王（三七日） | 邪淫 |
+| `gokan` | 五官王（四七日） | 業秤（妄語・飲酒と総量） |
+
+- 「主な報告」は Notion その10 の下調べと上流の報告の叩き台（D-040）から。王ごとに担当の戒を見せる画面案は未裁定（JG-002 で試す）
+- 獄吏がエンマの前まで連れてくるのは毎回同じなので、「案内人」はデータに持たない。三途の川の案内が普通でない件（社長など）だけ、初江王の欄に書く（D-040）
 
 ### 幕間の出るタイミング
 | id | 意味 |
 |---|---|
 | `nextMorning` | 翌朝 |
 | `noon` | その日の昼 |
+| `afterVerdict` | その件の判決の直後（行き先に関係なく） |
 
 ### 幕間の話し手
 | id | 意味 |
@@ -81,6 +85,7 @@
 | `takamura` | 小野篁 |
 | `enma` | エンマ |
 | `case` | その幕間の対象の亡者（`caseId`） |
+| `jailer` | 獄吏（声だけ） |
 | `direction` | ト書き（台詞ではない地の文） |
 | `null` | 台本に話し手の記載がない。check-data は注意として出す |
 
@@ -135,7 +140,7 @@
     "intoxicant": { "level": "light", "note": "" }
   },
   "upstream": {
-    "shinko": ["秦広王の報告の欄外に小さく「※本人ノ手ニヨルモノノミ計上」"],
+    "shinko": ["（欄外）※本人ノ手ニヨルモノノミ計上"],
     "shoko": ["衣領樹の枝はほとんどしならない"],
     "sotei": [], "gokan": [], "unsorted": []
   },
@@ -191,7 +196,7 @@
 {
   "formatVersion": 2,
   "interludes": [
-    { "id": "remand-default", "timing": "nextMorning", "caseId": null, "provisional": true,
+    { "id": "remand-default", "timing": "nextMorning", "caseId": null, "provisional": false,
       "lines": [ { "speaker": "takamura", "text": "昨日の方が、また並んでおられます" } ] }
   ]
 }
@@ -209,8 +214,8 @@
 - `interludesFor(判決の記録の並び, 台本)` が出す幕間 id を返す
 - 差し戻し（評価 `retrial`）した件 → 翌日の朝に、件ごとの上書き（`REMAND_INTERLUDE_BY_CASE`）か、なければ共通の既定 `remand-default`
 - 差し戻しが妥当（評価 `proper`）なら再審の幕間は出さない
-- 判決に関係なく、その件を裁いた日に出す幕間（`CASE_INTERLUDES`）。例：家畜産業の人 → 昼のカツ丼
-- 出しどころ未定（`UNSCHEDULED_INTERLUDES`）：リンゴ屋の鏡の場面
+- 判決に関係なく、その件を裁いた日に出す幕間（`CASE_INTERLUDES`）。例：家畜産業の人 → 昼のカツ丼／リンゴ屋 → 判決の直後に鏡の場面。日の中のどこで出すかは幕間の `timing`
+- 出しどころ未定（`UNSCHEDULED_INTERLUDES`）：今はなし
 - check-data は、コードが名指しする id がデータにあること、データの幕間がコードのどこかから出されることを見る
 
 ## 判決の記録（定義のみ。実装は JG-002）
@@ -254,6 +259,7 @@ formatVersion 1 では JSON に入れていなかった記述を、2 で次の�
 | 競馬場の主 | エンマの観察の注記「（エンマは常連客）」 | `writerNotes.misc` |
 | リンゴ屋 | 計器に出ないもの「部下を怒鳴ったこと。…」 | `writerNotes.notOnGauges` |
 | リンゴ屋 | 弁明の演出「聞いているうちに法廷がプレゼン会場になる」 | `writerNotes.misc` |
-| リンゴ屋 | 鏡の場面（幕間） | `data/interludes.json` の `mirror-ringoya`（出しどころ未定） |
-| 元営業マン | 差し戻し（翌朝の幕間）「昨日の営業の方、また並んでます」「慣れたもんじゃろ。」 | `news.overrides.remand` から `data/interludes.json` の `remand-moto-eigyoman` へ移した |
+| リンゴ屋 | 鏡の場面（幕間） | `data/interludes.json` の `mirror-ringoya`（判決の直後。D-040） |
+| 元営業マン | 差し戻し（翌朝の幕間）「昨日の営業の方、また並んでます」「慣れたもんじゃろ。」 | `news.overrides.remand` から `data/interludes.json` の `remand-moto-eigyoman` へ移した。話し手は獄吏（声だけ）とエンマ（D-040） |
+| 瀬戸物屋の隠居 | 差し戻しのニュース「差し戻された隠居、窓口に再び並ぶ…」 | ニュースから外し、作者裁定の文で `data/interludes.json` の `remand-inkyo-setomonoya` に（D-040） |
 | 全件 | 「書いてみて分かったこと」「見どころ」「懸念」 | 入れない。設計メモとして Notion に残す |
