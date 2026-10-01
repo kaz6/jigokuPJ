@@ -22,8 +22,10 @@ export const WITNESS_TYPES = ['mosquito', 'human', 'pet', 'horse', 'pig', 'bird'
 export const CASE_KINDS = ['baseline', 'variant'];
 
 // 幕間：出るタイミングと、台詞の話し手
-export const INTERLUDE_TIMINGS = ['nextMorning', 'noon'];
-export const INTERLUDE_SPEAKERS = ['takamura', 'enma', 'case', 'direction'];
+//   nextMorning：翌朝／noon：その日の昼／afterVerdict：その件の判決の直後（行き先に関係なく）
+//   jailer：獄吏（声だけ）
+export const INTERLUDE_TIMINGS = ['nextMorning', 'noon', 'afterVerdict'];
+export const INTERLUDE_SPEAKERS = ['takamura', 'enma', 'case', 'jailer', 'direction'];
 
 // 「ニュースなし」の印。わざと何も起きない結果。空欄や書き忘れとは別物
 export const isNoNews = (v) => v !== null && typeof v === 'object' && v.none === true;
@@ -52,23 +54,25 @@ export function resolveNews(caseData, destination) {
 // 差し戻しの翌朝の幕間：件ごとの上書き → 共通の既定
 export const REMAND_INTERLUDE_DEFAULT = 'remand-default';
 const REMAND_INTERLUDE_BY_CASE = {
+  'inkyo-setomonoya': 'remand-inkyo-setomonoya',
   'moto-eigyoman': 'remand-moto-eigyoman',
 };
 
 // 判決に関係なく、その件を裁いた日に出る幕間
 const CASE_INTERLUDES = {
   chikusan: ['katsudon-chikusan'],
+  ringoya: ['mirror-ringoya'],
 };
 
 // 出しどころが未確定の幕間（データはあるが、まだどこにも出さない）
-export const UNSCHEDULED_INTERLUDES = ['mirror-ringoya'];
+export const UNSCHEDULED_INTERLUDES = [];
 
 export function remandInterludeId(caseId) {
   return REMAND_INTERLUDE_BY_CASE[caseId] ?? REMAND_INTERLUDE_DEFAULT;
 }
 
 // 判決の記録（DATA_FORMAT「判決の記録」）から、出す幕間の id を並べる。
-//   day 日目に裁いた件 → その日の幕間（例：昼のカツ丼）
+//   day 日目に裁いた件 → その日の幕間（例：昼のカツ丼、判決直後の鏡の場面）。いつ出すかは幕間の timing
 //   day 日目に差し戻した件（評価 retrial）→ day+1 日目の朝の幕間
 //   差し戻しが妥当（評価 proper。水木のような件）なら再審の幕間は出さない
 // cases：caseId → 一件の台本。返り値：[{ day, interludeId, caseId }]。

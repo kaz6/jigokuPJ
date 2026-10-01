@@ -1,14 +1,17 @@
 {
   "formatVersion": 2,
-  "source": "企画ページ「誤った差し戻しの扱い」「元営業マン」「④家畜産業の人」「⑥リンゴ屋」、追記その9（いずれも 2026-10-01）",
+  "source": "企画ページ「誤った差し戻しの扱い」「元営業マン」「④家畜産業の人」「⑥リンゴ屋」、追記その9・その10（いずれも 2026-10-01）",
   "interludes": [
     {
       "id": "remand-default",
       "timing": "nextMorning",
       "caseId": null,
-      "provisional": true,
+      "provisional": false,
       "lines": [
-        { "speaker": "takamura", "text": "昨日の方が、また並んでおられます" }
+        {
+          "speaker": "takamura",
+          "text": "昨日の方が、また並んでおられます"
+        }
       ]
     },
     {
@@ -17,8 +20,34 @@
       "caseId": "moto-eigyoman",
       "provisional": false,
       "lines": [
-        { "speaker": null, "text": "昨日の営業の方、また並んでます" },
-        { "speaker": null, "text": "慣れたもんじゃろ。" }
+        {
+          "speaker": "jailer",
+          "text": "昨日の営業の方、また並んでます"
+        },
+        {
+          "speaker": "enma",
+          "text": "慣れたもんじゃろ。"
+        }
+      ]
+    },
+    {
+      "id": "remand-inkyo-setomonoya",
+      "timing": "nextMorning",
+      "caseId": "inkyo-setomonoya",
+      "provisional": false,
+      "lines": [
+        {
+          "speaker": "takamura",
+          "text": "昨日の隠居殿が、また並んでおられます"
+        },
+        {
+          "speaker": "case",
+          "text": "ここ、さっきも並んだんですけど"
+        },
+        {
+          "speaker": "enma",
+          "text": "昨日じゃ、昨日。"
+        }
       ]
     },
     {
@@ -27,16 +56,22 @@
       "caseId": "chikusan",
       "provisional": false,
       "lines": [
-        { "speaker": "direction", "text": "その日の昼、エンマの机にカツ丼" }
+        {
+          "speaker": "direction",
+          "text": "その日の昼、エンマの机にカツ丼"
+        }
       ]
     },
     {
       "id": "mirror-ringoya",
-      "timing": null,
+      "timing": "afterVerdict",
       "caseId": "ringoya",
       "provisional": false,
       "lines": [
-        { "speaker": "direction", "text": "割れた浄玻璃鏡を見て「代わりの鏡を作りましょう」と申し出る。できあがるのは黒い板。真実は映らないが、みんな見入る" }
+        {
+          "speaker": "direction",
+          "text": "割れた浄玻璃鏡を見て「代わりの鏡を作りましょう」と申し出る。できあがるのは黒い板。真実は映らないが、みんな見入る"
+        }
       ]
     }
   ]
