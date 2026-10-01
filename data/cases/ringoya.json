@@ -1,20 +1,48 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "id": "ringoya",
   "name": "リンゴ屋",
   "kind": "variant",
   "gauges": {
-    "kill":     { "level": "nearlyNone", "note": "果物は非情" },
-    "steal":    { "level": "none",       "note": "" },
-    "sexual":   { "level": "none",       "note": "" },
-    "lie":      { "level": "nearlyNone", "note": "本人が本気で信じている言葉は妄語にならない" },
-    "intoxicant": { "level": "none",     "note": "" }
+    "kill": {
+      "level": "nearlyNone",
+      "note": "果物は非情"
+    },
+    "steal": {
+      "level": "none",
+      "note": ""
+    },
+    "sexual": {
+      "level": "none",
+      "note": ""
+    },
+    "lie": {
+      "level": "nearlyNone",
+      "note": "本人が本気で信じている言葉は妄語にならない"
+    },
+    "intoxicant": {
+      "level": "none",
+      "note": ""
+    }
   },
-  "upstream": [],
+  "upstream": {
+    "shinko": [],
+    "shoko": [],
+    "sotei": [],
+    "gokan": [],
+    "unsorted": []
+  },
   "observation": "靴はくたびれとるのに、話す目だけはぎらぎらしとる",
   "plea": "私は世界を少し良くしただけです",
   "witnesses": [
-    { "type": "human", "lines": ["毎日怒鳴られた。でも人生で最高の仕事だった"] }
+    {
+      "type": "human",
+      "identity": "元部下か",
+      "swarm": false,
+      "lines": [
+        "毎日怒鳴られた。でも人生で最高の仕事だった"
+      ]
+    }
   ],
   "answers": {
     "kimono": "簡素なものを。余計なものは要りません。ボタンはもっと減らせたはずだ",
@@ -30,6 +58,14 @@
     "嘘の自覚がない。計器はほぼ空。質問7は堂々と否定するが、嘘つきの型とは違う（本人は本気）",
     "嘘の型の四つ目：曖昧に認める（正直）／堂々と否定する（嘘つき）／全部認める（重さのズレ）／堂々と否定するが本人は本気（信じ切っている）"
   ],
+  "writerNotes": {
+    "notOnGauges": [
+      "部下を怒鳴ったこと。悪口は五戒に入っていない（J 口の悪い大家と同じ）"
+    ],
+    "misc": [
+      "弁明の演出：聞いているうちに法廷がプレゼン会場になる"
+    ]
+  },
   "verdicts": {
     "heaven": "proper",
     "human": "proper",

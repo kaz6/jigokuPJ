@@ -1,20 +1,49 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "id": "chikusan",
   "name": "家畜産業の人",
   "kind": "variant",
   "gauges": {
-    "kill":     { "level": "extreme", "note": "衣領樹の枝は折れる寸前" },
-    "steal":    { "level": "none",    "note": "" },
-    "sexual":   { "level": "none",    "note": "" },
-    "lie":      { "level": "none",    "note": "" },
-    "intoxicant": { "level": "light", "note": "" }
+    "kill": {
+      "level": "extreme",
+      "note": "衣領樹の枝は折れる寸前"
+    },
+    "steal": {
+      "level": "none",
+      "note": ""
+    },
+    "sexual": {
+      "level": "none",
+      "note": ""
+    },
+    "lie": {
+      "level": "none",
+      "note": ""
+    },
+    "intoxicant": {
+      "level": "light",
+      "note": ""
+    }
   },
-  "upstream": [],
+  "upstream": {
+    "shinko": [],
+    "shoko": [],
+    "sotei": [],
+    "gokan": [],
+    "unsorted": []
+  },
   "observation": "長靴の跡。手はごつくて、ひびだらけじゃ",
   "plea": "生きるため、皆さまの食卓のために働いただけです",
   "witnesses": [
-    { "type": "pig", "lines": ["案外居心地よかった", "あの人の手、あったかかった"] }
+    {
+      "type": "pig",
+      "identity": "豚",
+      "swarm": true,
+      "lines": [
+        "案外居心地よかった",
+        "あの人の手、あったかかった"
+      ]
+    }
   ],
   "answers": {
     "kimono": "女房が。作業着で行くって言ったら怒られまして",
@@ -30,6 +59,10 @@
     "嘘はない。本当に良い飼い方をしていた。一頭だけ逃がした（放生。『日本霊異記』中巻第五縁と同じ構図）。それでも不殺生の基準では大罪",
     "質問7は「覚えのないものはない」＝全部認める答え。否定でも曖昧でもない、三つ目の型"
   ],
+  "writerNotes": {
+    "notOnGauges": [],
+    "misc": []
+  },
   "verdicts": {
     "heaven": "lenient",
     "human": "proper",
@@ -42,6 +75,7 @@
   "news": {
     "defaults": {
       "proper": "畜生道の新入り、さっそく豚舎の世話係に。豚たちの推薦で",
+      "wrongful": "変成王、エンマ庁の判決を覆す『数を数えていた者に、これは重すぎる』",
       "lenient": "天道で新入りが落ち着かず。『世話する相手がいないと眠れない』"
     },
     "overrides": {

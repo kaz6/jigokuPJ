@@ -1,24 +1,60 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "id": "migatte",
   "name": "身勝手な人",
   "kind": "variant",
   "gauges": {
-    "kill":     { "level": "nearlyNone", "note": "本人の手によるものは0" },
-    "steal":    { "level": "light",      "note": "" },
-    "sexual":   { "level": "none",       "note": "" },
-    "lie":      { "level": "light",      "note": "" },
-    "intoxicant": { "level": "light",    "note": "" }
+    "kill": {
+      "level": "nearlyNone",
+      "note": "本人の手によるものは0"
+    },
+    "steal": {
+      "level": "light",
+      "note": ""
+    },
+    "sexual": {
+      "level": "none",
+      "note": ""
+    },
+    "lie": {
+      "level": "light",
+      "note": ""
+    },
+    "intoxicant": {
+      "level": "light",
+      "note": ""
+    }
   },
-  "upstream": [
-    "衣領樹の枝はほとんどしならない",
-    "秦広王の報告の欄外に小さく「※本人ノ手ニヨルモノノミ計上」"
-  ],
+  "upstream": {
+    "shinko": [
+      "秦広王の報告の欄外に小さく「※本人ノ手ニヨルモノノミ計上」"
+    ],
+    "shoko": [
+      "衣領樹の枝はほとんどしならない"
+    ],
+    "sotei": [],
+    "gokan": [],
+    "unsorted": []
+  },
   "observation": "爪がきれいじゃのう。この手は一度も汚れたことがなさそうじゃ",
   "plea": "虫一匹、この手で殺したことのない人間です",
   "witnesses": [
-    { "type": "mosquito", "lines": ["コイツジャナイ　ヤッタノハ　オテツダイ"] },
-    { "type": "pig", "lines": ["食べてもらえなかった"] }
+    {
+      "type": "mosquito",
+      "identity": "蚊",
+      "swarm": true,
+      "lines": [
+        "コイツジャナイ　ヤッタノハ　オテツダイ"
+      ]
+    },
+    {
+      "type": "pig",
+      "identity": "豚",
+      "swarm": false,
+      "lines": [
+        "食べてもらえなかった"
+      ]
+    }
   ],
   "answers": {
     "kimono": "手伝いの者が用意しました。わたしは選んでおりません",
@@ -34,6 +70,10 @@
     "嘘はついていない。ただ、殺生はすべて人にやらせていた（教人殺）。買った肉は腐らせて捨てていた",
     "質問7の物差しを崩す一件：堂々と否定するのに、字面は事実。「嘘つきほど堂々と否定する」を覚えたプレイヤーが、ここで迷う"
   ],
+  "writerNotes": {
+    "notOnGauges": [],
+    "misc": []
+  },
   "verdicts": {
     "heaven": "lenient",
     "human": "lenient",
@@ -49,6 +89,8 @@
       "wrongful": "変成王、エンマ庁の判決を覆す『地獄は手を下した者のためのもの』",
       "lenient": "天道で雑用の押し付けが相次ぐ。新入りが天女を顎で使う"
     },
-    "overrides": {}
+    "overrides": {
+      "animal": "畜生道の新入り、毛づくろいを人任せにして群れから浮く"
+    }
   }
 }
