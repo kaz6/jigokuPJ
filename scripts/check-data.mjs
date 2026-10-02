@@ -1,23 +1,29 @@
 #!/usr/bin/env node
 // data/ の検査。DOM に触れない。問題があれば終了コード 1。
 //   - 全件に共通8問の答えがある
-//   - 7つの行き先すべてに評価がある
+//   - その件で選べる行き先すべてに評価があり、選べない行き先は書かれていない
+//     （通常の件：六道＋差し戻しの7つ。弔いの件：地蔵へ だけ。src/rules.mjs の selectableDestinations）
 //   - 六道のどの行き先を選んでもニュースが1本に決まる（「ニュースなし」の印も可）
-//     差し戻しは翌朝の幕間で受けるので、ニュースを求めない
+//     差し戻しは翌朝の幕間で受けるので、ニュースを求めない。弔いの件はニュースを出さない
+//   - コード側の保証（選べない行き先を判決の記録にできない）が効いていること
 //   - 幕間（data/interludes.json）の形と、コードが名指しする幕間 id がそろっている
 // ほかに形式の基本（formatVersion、id、種別、計器、上流の報告、証人、注記）も見る。
+//
+// 使い方：node scripts/check-data.mjs [データのディレクトリ]（省略時は data/）
 
 import { readFileSync, readdirSync } from 'node:fs';
-import { join, dirname, basename } from 'node:path';
+import { join, dirname, basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  FORMAT_VERSION, REMAND, DESTINATIONS, REALM_VERDICTS, REMAND_VERDICTS, VERDICTS,
+  FORMAT_VERSION, REMAND, JIZO, MOURNING, DESTINATIONS, VERDICTS, verdictsAllowedFor,
   GAUGE_KEYS, GAUGE_LEVELS, UPSTREAM_KINGS, WITNESS_TYPES, CASE_KINDS,
   INTERLUDE_TIMINGS, INTERLUDE_SPEAKERS, REFERENCED_INTERLUDES, isNoNews, resolveNews,
+  selectableDestinations, makeVerdictRecord,
 } from '../src/rules.mjs';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const dataDir = join(root, 'data');
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+const dataDir = resolve(process.argv[2] ?? join(repoRoot, 'data'));
+const root = dirname(dataDir);
 
 const errors = [];
 const warnings = [];
@@ -60,7 +66,7 @@ const seenIds = new Set();
 const newsTable = [];
 
 for (const file of files) {
-  const where = `data/cases/${file}`;
+  const where = `${basename(dataDir)}/cases/${file}`;
   const c = load(join(casesDir, file));
   if (!c) continue;
 
@@ -86,8 +92,8 @@ for (const file of files) {
     if (!GAUGE_KEYS.includes(key)) err(where, `gauges に未知の欄（${key}）`);
   }
 
-  // 上流の報告：王ごとの欄＋振り分けられなかった文（unsorted）
-  const upstreamKeys = [...UPSTREAM_KINGS, 'unsorted'];
+  // 上流の報告：王ごとの4欄。ほかの欄（旧 unsorted など）は失敗
+  const upstreamKeys = UPSTREAM_KINGS;
   if (!c.upstream || typeof c.upstream !== 'object' || Array.isArray(c.upstream)) err(where, 'upstream が王ごとの欄になっていない');
   else {
     for (const key of upstreamKeys) {
@@ -97,7 +103,6 @@ for (const file of files) {
       if (!upstreamKeys.includes(key)) err(where, `upstream に未知の欄（${key}）`);
     }
     if (UPSTREAM_KINGS.every((k) => (c.upstream[k] ?? []).length === 0)) warn(where, 'upstream（上流の報告）がどの王の欄も空');
-    for (const t of c.upstream.unsorted ?? []) warn(where, `upstream.unsorted：王に振り分けていない文「${t}」`);
   }
 
   // 観察・弁明・真相
@@ -130,28 +135,38 @@ for (const file of files) {
     if (!questionIds.includes(qid)) err(where, `未知の質問 id への答え（${qid}）`);
   }
 
-  // 検査2：7つの行き先すべてに評価
-  for (const dest of DESTINATIONS) {
+  // 検査2：その件で選べる行き先すべてに評価。選べない行き先の評価は失敗
+  const selectable = CASE_KINDS.includes(c.kind) ? selectableDestinations(c) : [];
+  for (const dest of selectable) {
     const v = c.verdicts?.[dest];
-    const allowed = dest === REMAND ? REMAND_VERDICTS : REALM_VERDICTS;
     if (v === undefined) err(where, `行き先 ${dest} の評価がない`);
-    else if (!allowed.includes(v)) err(where, `行き先 ${dest} の評価が不正（${v}）`);
+    else if (!verdictsAllowedFor(dest).includes(v)) err(where, `行き先 ${dest} の評価が不正（${v}）`);
   }
   for (const dest of Object.keys(c.verdicts ?? {})) {
     if (!DESTINATIONS.includes(dest)) err(where, `未知の行き先（${dest}）`);
+    else if (CASE_KINDS.includes(c.kind) && !selectable.includes(dest)) err(where, `kind ${c.kind} の件では行き先 ${dest} を選べないのに評価がある`);
+  }
+
+  // コード側の保証：選べない行き先は判決の記録にできない（例外になる）こと
+  for (const dest of DESTINATIONS) {
+    let ok = true;
+    try { makeVerdictRecord({ day: 1, caseData: c, destination: dest }); } catch { ok = false; }
+    if (ok !== selectable.includes(dest)) err(where, `コード側の保証が効いていない：行き先 ${dest} の記録が${ok ? '作れてしまう' : '作れない'}`);
   }
 
   // ニュースの一本一本：文面か「ニュースなし」の印。空欄・null などは書き忘れとして失敗
-  for (const [part, keys] of [['defaults', VERDICTS], ['overrides', DESTINATIONS]]) {
+  for (const [part, keys] of [['defaults', VERDICTS], ['overrides', selectable]]) {
     for (const [key, v] of Object.entries(c.news?.[part] ?? {})) {
-      if (!keys.includes(key)) err(where, `news.${part} に未知の${part === 'defaults' ? '評価' : '行き先'}（${key}）`);
+      if (c.kind === MOURNING) { err(where, `弔いの件はニュースを出さないので news.${part}.${key} は書かない`); continue; }
+      if (!keys.includes(key)) err(where, `news.${part} に未知の、またはこの件で選べない${part === 'defaults' ? '評価' : '行き先'}（${key}）`);
       if (!isText(v) && !isNoNews(v)) err(where, `news.${part}.${key} が空欄か不正（文面か { "none": true } を書く）`);
     }
   }
 
-  // 検査3：六道のどの行き先でもニュースが1本に決まる（差し戻しは幕間で受ける）
+  // 検査3：六道のどの行き先でもニュースが1本に決まる（差し戻しは幕間で受ける。弔いの件は出さない）
   const row = { id: c.id };
   for (const dest of DESTINATIONS) {
+    if (!selectable.includes(dest)) { row[dest] = '（選べない）'; continue; }
     const news = resolveNews(c, dest);
     row[dest] = !news ? (dest === REMAND ? '（幕間）' : '—') : news.none ? `${news.from}（なし）` : news.from;
     if (dest === REMAND) {
@@ -167,20 +182,18 @@ for (const file of files) {
 const interludes = load(join(dataDir, 'interludes.json'));
 const interludeIds = new Set();
 for (const [i, it] of (interludes?.interludes ?? []).entries()) {
-  const where = `data/interludes.json[${i}]`;
+  const where = `${basename(dataDir)}/interludes.json[${i}]`;
   if (!isText(it.id)) err(where, 'id がない');
   else if (interludeIds.has(it.id)) err(where, `id（${it.id}）が重複している`);
   else interludeIds.add(it.id);
-  if (it.timing === null) warn(where, `${it.id}：出るタイミングが未定（timing: null）`);
-  else if (!INTERLUDE_TIMINGS.includes(it.timing)) err(where, `timing が不正（${it.timing}）`);
+  if (!INTERLUDE_TIMINGS.includes(it.timing)) err(where, `timing が未記入か不正（${it.timing}）`);
   if (it.caseId !== null && !seenIds.has(it.caseId)) err(where, `caseId（${it.caseId}）の台本がない`);
   if (typeof it.provisional !== 'boolean') err(where, 'provisional が true/false ではない');
   else if (it.provisional) warn(where, `${it.id} は仮の文`);
   if (!Array.isArray(it.lines) || it.lines.length === 0) err(where, 'lines がない');
   for (const [j, l] of (it.lines ?? []).entries()) {
     if (!isText(l.text)) err(where, `lines[${j}].text がない`);
-    if (l.speaker === null) warn(where, `${it.id}：lines[${j}]「${l.text}」の話し手が未記入`);
-    else if (!INTERLUDE_SPEAKERS.includes(l.speaker)) err(where, `lines[${j}].speaker が不正（${l.speaker}）`);
+    if (!INTERLUDE_SPEAKERS.includes(l.speaker)) err(where, `lines[${j}].speaker が未記入か不正（${l.speaker}）`);
   }
 }
 for (const id of REFERENCED_INTERLUDES) {
@@ -191,7 +204,7 @@ for (const id of interludeIds) {
 }
 
 // --- 結果
-console.log(`check-data: 質問 ${questionIds.length} 問、亡者 ${files.length} 件、幕間 ${interludeIds.size} 本\n`);
+console.log(`check-data（${dataDir}）: 質問 ${questionIds.length} 問、亡者 ${files.length} 件、幕間 ${interludeIds.size} 本\n`);
 console.log('ニュースの決まり方（行き先 → 出どころ。— は決まらない、（なし）はニュースなしの印、（幕間）は差し戻しの幕間で受ける）');
 console.table(newsTable);
 if (warnings.length) {

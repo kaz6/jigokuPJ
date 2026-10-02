@@ -1,5 +1,5 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "id": "keibajo-nushi",
   "name": "競馬場の主",
   "kind": "variant",
@@ -37,8 +37,7 @@
     ],
     "gokan": [
       "業秤、殺の皿が重い。妄語は中程度、飲酒は軽"
-    ],
-    "unsorted": []
+    ]
   },
   "observation": "金の時計に、蹄鉄のタイピン。……この顔、パドックで見たことがあるのう",
   "plea": "わしは場を貸しただけ。賭けたのは客じゃ",

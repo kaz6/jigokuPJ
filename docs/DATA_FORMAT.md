@@ -1,6 +1,6 @@
-# DATA_FORMAT（formatVersion 2）
+# DATA_FORMAT（formatVersion 3）
 
-> 版の履歴：1＝JG-001。2＝JG-001b（上流の報告を王ごとの欄に／証人に正体・群れ／書き手用の注記／「ニュースなし」の印／差し戻しの評価に proper／幕間データ）。JG-001c（2026-10-01）は版を上げていない：幕間の話し手に `jailer`、タイミングに `afterVerdict` を足しただけで、既存のデータはそのまま読める（R-015）。DECISION_LOG の D-037・D-040・R-006〜 を参照
+> 版の履歴：1＝JG-001。2＝JG-001b（上流の報告を王ごとの欄に／証人に正体・群れ／書き手用の注記／「ニュースなし」の印／差し戻しの評価に proper／幕間データ）。JG-001c（2026-10-01）は版を上げていない：幕間の話し手に `jailer`、タイミングに `afterVerdict` を足しただけで、既存のデータはそのまま読める（R-015）。3＝JG-001d（2026-10-02）：上流の報告の `unsorted` を廃止／幕間の話し手と timing を必須（null は失敗）／件の種類に `mourning`（弔い）／行き先に `jizo`（地蔵へ）。DECISION_LOG の D-037・D-040・D-044・D-045・R-006〜 を参照
 
 > データ形式の説明。**一件の台本の形式と判決の記録の形式は不可逆の芯**（ARCHITECTURE_PRINCIPLES 参照）。勝手に変えない。変えるときは formatVersion を上げ、DECISION_LOG に記録する。
 > 選び方（「この評価ならこのニュース」）はコード側（`src/rules.mjs`）、文面はデータ側。条件式を JSON に書かない。
@@ -14,11 +14,11 @@
 | `data/cases/<id>.json` | 一件の台本（亡者ひとりぶん）。ファイル名＝id |
 | `data/interludes.json` | 幕間（アドベンチャーパートの短い場面） |
 
-すべてのファイルの最上位に `"formatVersion": 2` を持つ。
+すべてのファイルの最上位に `"formatVersion": 3` を持つ。
 
 ## 共通の値（コード側の定数 `src/rules.mjs`）
 
-### 行き先（7つ）
+### 行き先（8つ）
 | id | 意味 |
 |---|---|
 | `heaven` | 天道 |
@@ -28,6 +28,9 @@
 | `hungryGhost` | 餓鬼道 |
 | `hell` | 地獄道 |
 | `remand` | 差し戻し（常に机にある印） |
+| `jizo` | 地蔵へ（弔いの件だけに出る特殊裁定欄。エンマは裁かず地蔵菩薩に託す） |
+
+どの件でどの行き先を選べるかは件の種類で決まる（コード側 `selectableDestinations`。下の「件の種類」）。
 
 ### 評価
 | 値 | 意味 | 使える行き先 |
@@ -37,8 +40,21 @@
 | `lenient` | 見逃し（軽すぎる） | 六道 |
 | `retrial` | 翌日に再審（誤った差し戻し） | 差し戻し |
 | `proper` | 妥当 | 差し戻しにも使える（水木のような「差し戻しだけが妥当」の件） |
+| `proper` | 妥当 | 地蔵へ（これだけ。R-017） |
 
 評価はプレイヤーに見せない（作者裁定）。翌朝のニュースの味を決めるためだけに使う。
+
+### 件の種類（`kind`）と、種類で決まる振る舞い
+振る舞いは JSON に書かず、コード側（`src/rules.mjs`）が種類から決める（D-045）。
+
+| id | 意味 | 選べる行き先 | 線香 | ニュース |
+|---|---|---|---|---|
+| `baseline` | 平常の亡者（ベースライン用） | 六道＋差し戻し | 減る | 出す |
+| `variant` | 変わり種 | 六道＋差し戻し | 減る | 出す |
+| `mourning` | 弔い（水子など） | 地蔵へ だけ | 減らさない | 出さない |
+
+- 通常の件（`baseline`／`variant`）で「地蔵へ」は選べない。弔いの件で六道・差し戻しは選べない。コード（`assertSelectable`・`makeVerdictRecord`・`resolveNews` が例外を出す）と check-data の両方で保証する
+- 強制判決のランダム送りも、選べる行き先の中から選ぶ（弔いの件なら「地蔵へ」だけ）
 
 ### 計器の欄（五戒）
 | id | 戒 |
@@ -87,7 +103,8 @@
 | `case` | その幕間の対象の亡者（`caseId`） |
 | `jailer` | 獄吏（声だけ） |
 | `direction` | ト書き（台詞ではない地の文） |
-| `null` | 台本に話し手の記載がない。check-data は注意として出す |
+
+話し手と出るタイミングは**必須**。`null` や上の表にない値は check-data が失敗にする（D-044）
 
 ### 証人の伝え方の型（6種で確定）
 | id | 伝え方 |
@@ -103,7 +120,7 @@
 
 ```json
 {
-  "formatVersion": 1,
+  "formatVersion": 3,
   "questions": [
     { "id": "record", "order": 7, "heading": "罪の記録",
       "text": "これらおぬしの罪の記録に、覚えのないものはあるか？",
@@ -118,7 +135,7 @@
 ## params.json
 
 ```json
-{ "formatVersion": 1,
+{ "formatVersion": 3,
   "params": { "questionsPerDay": { "value": 30, "unit": "回", "provisional": false, "note": "…" } } }
 ```
 - `provisional: true` は仮の値（check-data が注意として出す）
@@ -128,7 +145,7 @@
 
 ```json
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "id": "migatte",
   "name": "身勝手な人",
   "kind": "variant",
@@ -142,7 +159,7 @@
   "upstream": {
     "shinko": ["（欄外）※本人ノ手ニヨルモノノミ計上"],
     "shoko": ["衣領樹の枝はほとんどしならない"],
-    "sotei": [], "gokan": [], "unsorted": []
+    "sotei": [], "gokan": []
   },
   "observation": "爪がきれいじゃのう。…",
   "plea": "虫一匹、この手で殺したことのない人間です",
@@ -166,9 +183,9 @@
 |---|---|---|
 | `id` | string | 安定した id（ローマ字のスラッグ）。判決の記録が参照する。**一度付けたら変えない** |
 | `name` | string | 作中の通称 |
-| `kind` | `baseline` / `variant` | 平常の亡者（ベースライン用）／変わり種 |
+| `kind` | `baseline` / `variant` / `mourning` | 平常の亡者（ベースライン用）／変わり種／弔い。振る舞いは上の「件の種類」 |
 | `gauges` | object | 五戒の5欄すべて必須。`level`（上の段階 or `null`）＋`note`（短い注記。なければ空文字） |
-| `upstream` | object | 上流の報告。王ごとの欄 `shinko`／`shoko`／`sotei`／`gokan`（各 string[]）と、どの王か決められない文の置き場 `unsorted`（string[]）。5欄すべて必須。記載がなければ空配列。`unsorted` に文があれば check-data は注意を出す |
+| `upstream` | object | 上流の報告。王ごとの欄 `shinko`／`shoko`／`sotei`／`gokan`（各 string[]）。4欄すべて必須、記載がなければ空配列。ほかの欄（旧 `unsorted` など）は失敗。上流の報告の文はすべて、どれかの王に入れる（D-044） |
 | `observation` | string | エンマの観察（見た目）。**正確な情報**として扱う |
 | `plea` | string | 亡者の弁明。嘘かもしれない |
 | `witnesses` | object[] | 証人の火の玉。`type`（伝え方の型）＋`identity`（正体：猫・メダカなど。**画面に出さない内部用**）＋`swarm`（群れなら true）＋`lines`（台詞。1つ以上）。すべて必須 |
@@ -176,9 +193,9 @@
 | `truth` | string[] | 真相（プレイヤーには直接見せない） |
 | `writerNotes.notOnGauges` | string[] | 書き手用：計器に出ないもの（五戒に入らないので数えられない悪さ）。画面に出さない |
 | `writerNotes.misc` | string[] | 書き手用：そのほかの注記（演出・作者向けの注記など）。画面に出さない |
-| `verdicts` | object | **7つの行き先すべて必須**。六道は proper/wrongful/lenient、差し戻しは retrial/proper |
-| `news.defaults` | object | 評価 → 既定のニュース（最大3本）。値は文面か「ニュースなし」の印 |
-| `news.overrides` | object | 行き先 → そのニュースで上書き。値は文面か「ニュースなし」の印 |
+| `verdicts` | object | **その件で選べる行き先すべてに必須**、選べない行き先は書かない。通常の件：六道（proper/wrongful/lenient）＋差し戻し（retrial/proper）の7つ。弔いの件：`{ "jizo": "proper" }` だけ（R-017） |
+| `news.defaults` | object | 評価 → 既定のニュース（最大3本）。値は文面か「ニュースなし」の印。弔いの件は空 `{}`（R-017） |
+| `news.overrides` | object | 行き先 → そのニュースで上書き。値は文面か「ニュースなし」の印。選べない行き先には書かない。弔いの件は空 `{}` |
 
 ### 「ニュースなし」の印
 - わざと何も起きない結果は `{ "none": true }` と書く。`defaults` のどの評価にも、`overrides` のどの行き先にも置ける（妥当専用にしない）
@@ -189,12 +206,14 @@
 1. `news.overrides[行き先]` があればそれ（文面、または「ニュースなし」）
 2. なければ `news.defaults[verdicts[行き先]]`。ただし**差し戻しは 2 を見ない**（評価の既定は六道に送った結果の文面なので流用しない）
 3. どちらもなければ「決まらない」。六道ならデータの不備（check-data が失敗にする）。差し戻しは翌朝の幕間で受けるので、決まらなくてよい
+- 弔いの件は 1〜3 を見ず、常に「ニュースなし」（`{ none: true, from: "kind.mourning" }`）
+- その件で選べない行き先を渡すと例外
 
 ## 幕間（data/interludes.json）
 
 ```json
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "interludes": [
     { "id": "remand-default", "timing": "nextMorning", "caseId": null, "provisional": false,
       "lines": [ { "speaker": "takamura", "text": "昨日の方が、また並んでおられます" } ] }
@@ -205,10 +224,10 @@
 | 項目 | 型 | 説明 |
 |---|---|---|
 | `id` | string | 安定した id。コード（`src/rules.mjs`）が名指しする。**一度付けたら変えない** |
-| `timing` | string / null | 出るタイミング（上の表）。`null` は未定（check-data は注意） |
+| `timing` | string | 出るタイミング（上の表）。必須（`null` は失敗） |
 | `caseId` | string / null | 対象の亡者の id。共通の幕間は `null` |
 | `provisional` | boolean | 仮の文なら true（check-data は注意） |
-| `lines` | object[] | 台詞の並び。`speaker`（上の表）＋`text` |
+| `lines` | object[] | 台詞の並び。`speaker`（上の表。必須、`null` は失敗）＋`text` |
 
 ### 幕間の出し方（コード側。JSON に条件は書かない）
 - `interludesFor(判決の記録の並び, 台本)` が出す幕間 id を返す
@@ -224,7 +243,7 @@
 
 ```json
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "day": 1,
   "caseId": "migatte",
   "destination": "hungryGhost",
@@ -238,12 +257,13 @@
 | `formatVersion` | number | この記録の形式の版 |
 | `day` | number | 何日目の判決か（1始まり） |
 | `caseId` | string | 一件の台本の `id` |
-| `destination` | string | 行き先 id（7つのどれか） |
+| `destination` | string | 行き先 id（8つのどれか。ただしその件で選べるものだけ。弔いの件は `jizo`） |
 | `forced` | boolean | 線香が燃え尽きたあとの強制判決だったか |
 | `random` | boolean | 強制判決で1分を過ぎ、ランダムに送られたか（`true` なら `forced` も `true`） |
 
 - 記録には評価もニュースも入れない。どちらも台本（`caseId`）と行き先から引ける
 - 差し戻し（`remand`）された亡者は、翌日に同じ `caseId` で二つ目の記録ができる
+- 記録はコード側の `makeVerdictRecord` で作る。その件で選べない行き先や、強制判決でないランダム送りは例外になる
 
 ## Notion の台本のうち、formatVersion 1 で入らなかった記述の行き先
 

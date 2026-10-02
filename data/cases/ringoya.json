@@ -1,5 +1,5 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "id": "ringoya",
   "name": "リンゴ屋",
   "kind": "variant",
@@ -37,8 +37,7 @@
     ],
     "gokan": [
       "業秤、ほぼ水平。妄語の皿はほとんど動かず"
-    ],
-    "unsorted": []
+    ]
   },
   "observation": "靴はくたびれとるのに、話す目だけはぎらぎらしとる",
   "plea": "私は世界を少し良くしただけです",
