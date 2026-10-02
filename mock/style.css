@@ -1,0 +1,133 @@
+/* JG-002 の画面。仮の図形と文字だけ。作り込みはしない */
+:root {
+  --bg: #1b1416; --panel: #2a2023; --line: #4a3a3e; --text: #f1e7e2; --dim: #b6a39c;
+  --accent: #e0a040; --red: #d0453a; --enma: #8a2a26;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; -webkit-text-size-adjust: 100%; }
+button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); gap: 6px; position: relative; overflow: hidden; }
+
+/* 上：状態 */
+#status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 6px 10px; background: var(--panel); font-size: 15px; }
+.incense { flex: 1 1 140px; height: 10px; background: #000; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; min-width: 100px; }
+#incense-fill { display: block; height: 100%; background: linear-gradient(90deg, #6b5a50, #c9b9a8 92%, #ff7a2a); }
+#forced { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; padding: 6px 10px; background: var(--red); font-size: 16px; }
+#forced[hidden] { display: none; }
+
+/* 中：法廷 */
+#court { flex: 1 1 auto; min-height: 0; display: grid; gap: 6px; padding: 0 6px;
+  grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1.4fr);
+  grid-template-areas: "icons view enma thought" "icons view enma speech"; }
+@media (orientation: portrait) {
+  #court { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1.2fr) minmax(0, 0.7fr) minmax(0, 1.3fr);
+    grid-template-areas: "icons view enma" "icons view thought" "speech speech speech"; }
+}
+#icons { grid-area: icons; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+#view { grid-area: view; }
+#enma-wrap { grid-area: enma; display: flex; align-items: center; justify-content: center; min-height: 0; }
+#thought { grid-area: thought; }
+#speech { grid-area: speech; }
+#view, #thought, #speech { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; overflow-y: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
+
+.icon { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--line); background: #3a2c30; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; padding: 0; flex: none; }
+.icon span { font-size: 20px; }
+.icon small { font-size: 9px; color: var(--dim); margin-top: 2px; }
+.icon.on { border-color: var(--accent); background: #4d3a2a; }
+
+#enma { width: min(100%, 260px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #b4443a, var(--enma)); display: flex; align-items: center; justify-content: center; font-size: clamp(40px, 9vmin, 96px); box-shadow: 0 0 0 4px #3a1a18; }
+#enma.forced { animation: shake .25s infinite; background: radial-gradient(circle at 40% 35%, #ff6a4a, var(--red)); }
+@keyframes shake { 0%,100% { transform: translate(0,0); } 25% { transform: translate(-3px,1px); } 75% { transform: translate(3px,-1px); } }
+
+h2, h3, h4 { margin: 0 0 6px; font-weight: normal; }
+h3 { font-size: 16px; color: var(--accent); }
+h4 { font-size: 14px; color: var(--dim); margin-top: 10px; }
+.report { margin: 4px 0; font-size: 15px; }
+.report.empty, .hint { color: var(--dim); font-size: 13px; }
+.label { font-size: 12px; color: var(--dim); }
+#thought p { margin: 4px 0; font-size: 16px; }
+
+.gauge { display: grid; grid-template-columns: 1.6em auto 1fr; gap: 2px 8px; align-items: center; margin: 4px 0; }
+.g-name { font-size: 18px; }
+.g-bar { display: inline-flex; gap: 2px; }
+.g-bar i { width: 10px; height: 14px; background: #000; border: 1px solid var(--line); }
+.g-bar i.on { background: var(--accent); }
+.g-level { font-size: 14px; }
+.g-note { grid-column: 1 / -1; font-size: 13px; color: var(--dim); padding-left: 1.6em; }
+
+/* 罪人：後ろ姿 */
+.back { position: relative; width: 120px; height: 150px; margin: 10px auto 0; }
+.back .head { position: absolute; left: 35px; top: 0; width: 50px; height: 50px; border-radius: 50%; background: #5d5050; }
+.back .body { position: absolute; left: 10px; top: 46px; width: 100px; height: 100px; border-radius: 50px 50px 8px 8px; background: #d8d0c4; }
+
+/* 証人：火の玉。種類ごとに動きだけ変える */
+.witnesses { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; padding: 16px 0; }
+.wit { position: relative; width: 96px; height: 96px; border: 1px dashed var(--line); border-radius: 12px; background: #1e1618; padding: 0; overflow: hidden; }
+.ball { position: absolute; left: 34px; top: 34px; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff, #7fd0ff 45%, #2a6aff); box-shadow: 0 0 12px #7fd0ff; }
+.wit.swarm .ball { width: 10px; height: 10px; left: calc(14px + var(--k) * 10px); top: 42px; animation-delay: calc(var(--k) * -0.13s) !important; }
+.t-mosquito .ball { animation: buzz .18s infinite; }
+.t-human .ball { animation: float 2.4s ease-in-out infinite; }
+.t-pet .ball { animation: rub 1.2s ease-in-out infinite; }
+.t-horse .ball { animation: gallop 1.1s linear infinite; }
+.t-pig .ball { animation: push 0.9s ease-in-out infinite; }
+.t-bird .ball { animation: circle 1.6s linear infinite; }
+@keyframes buzz { 0% { transform: translate(0,0); } 25% { transform: translate(3px,-4px); } 50% { transform: translate(-3px,2px); } 75% { transform: translate(2px,4px); } }
+@keyframes float { 0%,100% { transform: translateY(6px); } 50% { transform: translateY(-6px); } }
+@keyframes rub { 0%,100% { transform: translateX(-14px) rotate(-8deg); } 50% { transform: translateX(14px) rotate(8deg); } }
+@keyframes gallop { 0% { transform: translate(-30px, 0); } 25% { transform: translate(0, -18px); } 50% { transform: translate(30px, 0); } 75% { transform: translate(0, 18px); } 100% { transform: translate(-30px, 0); } }
+@keyframes push { 0%,100% { transform: scale(1); } 50% { transform: scale(1.6) translateY(8px); } }
+@keyframes circle { from { transform: rotate(0deg) translateX(22px) translateY(-14px) rotate(0deg); } to { transform: rotate(360deg) translateX(22px) translateY(-14px) rotate(-360deg); } }
+
+/* 言葉の枠 */
+.line { margin: 6px 0; font-size: 15px; line-height: 1.5; }
+.line b { display: inline-block; min-width: 3.5em; margin-right: 6px; font-weight: normal; padding: 0 4px; border-radius: 4px; font-size: 12px; text-align: center; }
+.sp-case b { background: #5d5050; }
+.sp-enma b { background: var(--enma); }
+.sp-takamura b { background: #2f5a4a; }
+.sp-jailer b { background: #444; }
+.sp-witness b { background: #2a4a7a; }
+.line.k-question span { color: var(--dim); }
+.line.direction { color: var(--dim); font-style: italic; }
+
+/* 下：質問と行き先 */
+#questions, #dests { display: grid; gap: 6px; padding: 0 6px; }
+#questions { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+#dests { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+@media (orientation: portrait) {
+  #questions { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #dests { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.q, .dest { min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: #33272a; font-size: 14px; padding: 4px; }
+.q .qn { color: var(--dim); font-size: 11px; margin-right: 4px; }
+.q.asked { border-color: var(--accent); }
+.q.asked::after { content: " ✓"; color: var(--accent); }
+.dest { background: #3b2a22; font-size: 15px; }
+.dest.d-remand { background: #2c3340; }
+.dest.armed { background: var(--accent); color: #000; }
+button:disabled { opacity: .35; }
+
+/* 隅 */
+#corner { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; justify-content: space-between; padding: 2px 10px 6px; font-size: 12px; color: var(--dim); }
+#speed { display: inline-flex; gap: 4px; align-items: center; }
+#speed button { padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: #2a2023; font-size: 13px; }
+#speed button.on { background: var(--accent); color: #000; }
+
+/* 朝・判決・昼・夜の画面（裁判パートの外。線香は燃えない） */
+#overlay { position: absolute; inset: 0; background: rgba(15, 10, 12, .94); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 24px 12px; z-index: 10; }
+#overlay[hidden] { display: none; }
+.sheet { width: min(640px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+.sheet h2 { font-size: 24px; color: var(--accent); }
+.sheet .mark { color: var(--red); }
+.interlude { border-left: 3px solid #2f5a4a; padding: 4px 10px; margin: 10px 0; }
+.interlude .tag { font-size: 11px; color: var(--dim); }
+.news { padding-left: 1.2em; }
+.news li { margin: 6px 0; font-size: 16px; }
+.verdicts { padding-left: 1.4em; }
+.verdicts li { margin: 6px 0; }
+.verdicts .who { color: var(--dim); }
+.verdicts em { color: var(--red); font-style: normal; font-size: 13px; }
+.tally { border-top: 1px solid var(--line); padding-top: 8px; }
+.next { display: block; width: 100%; margin-top: 12px; min-height: 48px; border-radius: 8px; border: 1px solid var(--accent); background: #4d3a2a; font-size: 17px; }
