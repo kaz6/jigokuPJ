@@ -4,7 +4,9 @@
   "type": "module",
   "description": "地獄極楽六道縁途（エンド）のモック用リポジトリ",
   "scripts": {
-    "check-data": "node scripts/check-data.mjs"
+    "check-data": "node scripts/check-data.mjs",
+    "check-day": "node scripts/check-day.mjs",
+    "build": "node scripts/build-mock.mjs"
   },
   "engines": {
     "node": ">=18"

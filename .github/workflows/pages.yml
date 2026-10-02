@@ -1,0 +1,48 @@
+# JG-002：dist/jigoku-mock.html を GitHub Pages で公開する（main へのマージで自動更新）
+# 公開 URL：https://kaz6.github.io/jigokuPJ/
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check-data
+      - run: npm run check-day
+      - run: npm run build
+      - name: 公開用のフォルダを作る
+        run: |
+          mkdir -p _site
+          cp dist/jigoku-mock.html _site/index.html
+          cp dist/jigoku-mock.html _site/jigoku-mock.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

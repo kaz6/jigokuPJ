@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>地獄極楽六道縁途 モック（JG-002）</title>
+<style>
+/* JG-002 の画面。仮の図形と文字だけ。作り込みはしない */
+:root {
+  --bg: #1b1416; --panel: #2a2023; --line: #4a3a3e; --text: #f1e7e2; --dim: #b6a39c;
+  --accent: #e0a040; --red: #d0453a; --enma: #8a2a26;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; -webkit-text-size-adjust: 100%; }
+button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); gap: 6px; position: relative; overflow: hidden; }
+
+/* 上：状態 */
+#status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 6px 10px; background: var(--panel); font-size: 15px; }
+.incense { flex: 1 1 140px; height: 10px; background: #000; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; min-width: 100px; }
+#incense-fill { display: block; height: 100%; background: linear-gradient(90deg, #6b5a50, #c9b9a8 92%, #ff7a2a); }
+#forced { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; padding: 6px 10px; background: var(--red); font-size: 16px; }
+#forced[hidden] { display: none; }
+
+/* 中：法廷 */
+#court { flex: 1 1 auto; min-height: 0; display: grid; gap: 6px; padding: 0 6px;
+  grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1.4fr);
+  grid-template-areas: "icons view enma thought" "icons view enma speech"; }
+@media (orientation: portrait) {
+  #court { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1.2fr) minmax(0, 0.7fr) minmax(0, 1.3fr);
+    grid-template-areas: "icons view enma" "icons view thought" "speech speech speech"; }
+}
+#icons { grid-area: icons; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+#view { grid-area: view; }
+#enma-wrap { grid-area: enma; display: flex; align-items: center; justify-content: center; min-height: 0; }
+#thought { grid-area: thought; }
+#speech { grid-area: speech; }
+#view, #thought, #speech { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; overflow-y: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
+
+.icon { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--line); background: #3a2c30; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; padding: 0; flex: none; }
+.icon span { font-size: 20px; }
+.icon small { font-size: 9px; color: var(--dim); margin-top: 2px; }
+.icon.on { border-color: var(--accent); background: #4d3a2a; }
+
+#enma { width: min(100%, 260px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #b4443a, var(--enma)); display: flex; align-items: center; justify-content: center; font-size: clamp(40px, 9vmin, 96px); box-shadow: 0 0 0 4px #3a1a18; }
+#enma.forced { animation: shake .25s infinite; background: radial-gradient(circle at 40% 35%, #ff6a4a, var(--red)); }
+@keyframes shake { 0%,100% { transform: translate(0,0); } 25% { transform: translate(-3px,1px); } 75% { transform: translate(3px,-1px); } }
+
+h2, h3, h4 { margin: 0 0 6px; font-weight: normal; }
+h3 { font-size: 16px; color: var(--accent); }
+h4 { font-size: 14px; color: var(--dim); margin-top: 10px; }
+.report { margin: 4px 0; font-size: 15px; }
+.report.empty, .hint { color: var(--dim); font-size: 13px; }
+.label { font-size: 12px; color: var(--dim); }
+#thought p { margin: 4px 0; font-size: 16px; }
+
+.gauge { display: grid; grid-template-columns: 1.6em auto 1fr; gap: 2px 8px; align-items: center; margin: 4px 0; }
+.g-name { font-size: 18px; }
+.g-bar { display: inline-flex; gap: 2px; }
+.g-bar i { width: 10px; height: 14px; background: #000; border: 1px solid var(--line); }
+.g-bar i.on { background: var(--accent); }
+.g-level { font-size: 14px; }
+.g-note { grid-column: 1 / -1; font-size: 13px; color: var(--dim); padding-left: 1.6em; }
+
+/* 罪人：後ろ姿 */
+.back { position: relative; width: 120px; height: 150px; margin: 10px auto 0; }
+.back .head { position: absolute; left: 35px; top: 0; width: 50px; height: 50px; border-radius: 50%; background: #5d5050; }
+.back .body { position: absolute; left: 10px; top: 46px; width: 100px; height: 100px; border-radius: 50px 50px 8px 8px; background: #d8d0c4; }
+
+/* 証人：火の玉。種類ごとに動きだけ変える */
+.witnesses { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; padding: 16px 0; }
+.wit { position: relative; width: 96px; height: 96px; border: 1px dashed var(--line); border-radius: 12px; background: #1e1618; padding: 0; overflow: hidden; }
+.ball { position: absolute; left: 34px; top: 34px; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff, #7fd0ff 45%, #2a6aff); box-shadow: 0 0 12px #7fd0ff; }
+.wit.swarm .ball { width: 10px; height: 10px; left: calc(14px + var(--k) * 10px); top: 42px; animation-delay: calc(var(--k) * -0.13s) !important; }
+.t-mosquito .ball { animation: buzz .18s infinite; }
+.t-human .ball { animation: float 2.4s ease-in-out infinite; }
+.t-pet .ball { animation: rub 1.2s ease-in-out infinite; }
+.t-horse .ball { animation: gallop 1.1s linear infinite; }
+.t-pig .ball { animation: push 0.9s ease-in-out infinite; }
+.t-bird .ball { animation: circle 1.6s linear infinite; }
+@keyframes buzz { 0% { transform: translate(0,0); } 25% { transform: translate(3px,-4px); } 50% { transform: translate(-3px,2px); } 75% { transform: translate(2px,4px); } }
+@keyframes float { 0%,100% { transform: translateY(6px); } 50% { transform: translateY(-6px); } }
+@keyframes rub { 0%,100% { transform: translateX(-14px) rotate(-8deg); } 50% { transform: translateX(14px) rotate(8deg); } }
+@keyframes gallop { 0% { transform: translate(-30px, 0); } 25% { transform: translate(0, -18px); } 50% { transform: translate(30px, 0); } 75% { transform: translate(0, 18px); } 100% { transform: translate(-30px, 0); } }
+@keyframes push { 0%,100% { transform: scale(1); } 50% { transform: scale(1.6) translateY(8px); } }
+@keyframes circle { from { transform: rotate(0deg) translateX(22px) translateY(-14px) rotate(0deg); } to { transform: rotate(360deg) translateX(22px) translateY(-14px) rotate(-360deg); } }
+
+/* 言葉の枠 */
+.line { margin: 6px 0; font-size: 15px; line-height: 1.5; }
+.line b { display: inline-block; min-width: 3.5em; margin-right: 6px; font-weight: normal; padding: 0 4px; border-radius: 4px; font-size: 12px; text-align: center; }
+.sp-case b { background: #5d5050; }
+.sp-enma b { background: var(--enma); }
+.sp-takamura b { background: #2f5a4a; }
+.sp-jailer b { background: #444; }
+.sp-witness b { background: #2a4a7a; }
+.line.k-question span { color: var(--dim); }
+.line.direction { color: var(--dim); font-style: italic; }
+
+/* 下：質問と行き先 */
+#questions, #dests { display: grid; gap: 6px; padding: 0 6px; }
+#questions { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+#dests { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+@media (orientation: portrait) {
+  #questions { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #dests { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.q, .dest { min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: #33272a; font-size: 14px; padding: 4px; }
+.q .qn { color: var(--dim); font-size: 11px; margin-right: 4px; }
+.q.asked { border-color: var(--accent); }
+.q.asked::after { content: " ✓"; color: var(--accent); }
+.dest { background: #3b2a22; font-size: 15px; }
+.dest.d-remand { background: #2c3340; }
+.dest.armed { background: var(--accent); color: #000; }
+button:disabled { opacity: .35; }
+
+/* 隅 */
+#corner { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; justify-content: space-between; padding: 2px 10px 6px; font-size: 12px; color: var(--dim); }
+#speed { display: inline-flex; gap: 4px; align-items: center; }
+#speed button { padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: #2a2023; font-size: 13px; }
+#speed button.on { background: var(--accent); color: #000; }
+
+/* 朝・判決・昼・夜の画面（裁判パートの外。線香は燃えない） */
+#overlay { position: absolute; inset: 0; background: rgba(15, 10, 12, .94); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 24px 12px; z-index: 10; }
+#overlay[hidden] { display: none; }
+.sheet { width: min(640px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+.sheet h2 { font-size: 24px; color: var(--accent); }
+.sheet .mark { color: var(--red); }
+.interlude { border-left: 3px solid #2f5a4a; padding: 4px 10px; margin: 10px 0; }
+.interlude .tag { font-size: 11px; color: var(--dim); }
+.news { padding-left: 1.2em; }
+.news li { margin: 6px 0; font-size: 16px; }
+.verdicts { padding-left: 1.4em; }
+.verdicts li { margin: 6px 0; }
+.verdicts .who { color: var(--dim); }
+.verdicts em { color: var(--red); font-style: normal; font-size: 13px; }
+.tally { border-top: 1px solid var(--line); padding-top: 8px; }
+.next { display: block; width: 100%; margin-top: 12px; min-height: 48px; border-radius: 8px; border: 1px solid var(--accent); background: #4d3a2a; font-size: 17px; }
+
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="status">
+    <span id="st-day"></span>
+    <span id="st-case"></span>
+    <span class="incense" aria-label="線香"><span id="incense-fill"></span></span>
+    <span id="st-left"></span>
+    <span id="st-asked"></span>
+    <span id="st-money"></span>
+  </header>
+  <div id="forced" hidden><b id="forced-line"></b><span id="forced-clock"></span></div>
+  <main id="court">
+    <nav id="icons" aria-label="視点の切り替え"></nav>
+    <section id="view"></section>
+    <section id="enma-wrap"><div id="enma"><span>閻</span></div></section>
+    <section id="thought"></section>
+    <section id="speech"></section>
+  </main>
+  <section id="questions" aria-label="質問"></section>
+  <section id="dests" aria-label="行き先"></section>
+  <footer id="corner"><span id="seed"></span><span id="speed"></span><span class="build">JG-002 build e403697c</span></footer>
+  <div id="overlay" hidden></div>
+</div>
+<script>
+(function () {
+'use strict';
+const DATA = {"cases":[{"formatVersion":3,"id":"chikusan","name":"家畜産業の人","kind":"variant","gauges":{"kill":{"level":"extreme","note":"衣領樹の枝は折れる寸前"},"steal":{"level":"none","note":""},"sexual":{"level":"none","note":""},"lie":{"level":"none","note":""},"intoxicant":{"level":"light","note":""}},"upstream":{"shinko":["殺生、数え切れず。「※概数ニテ計上」"],"shoko":["衣領樹の枝、折れる寸前。盗みの記録なし"],"sotei":["邪淫の記録なし"],"gokan":["業秤、殺の皿だけが床に着く。妄語なし、飲酒は軽"]},"observation":"長靴の跡。手はごつくて、ひびだらけじゃ","plea":"生きるため、皆さまの食卓のために働いただけです","witnesses":[{"type":"pig","identity":"豚","swarm":true,"lines":["案外居心地よかった","あの人の手、あったかかった"]}],"answers":{"kimono":"女房が。作業着で行くって言ったら怒られまして","rokumon":"女房が。紙のでした。うちは現金主義なんですがね","wealth":"豚で。財は、豚舎の建て替えでだいたい消えました","beloved":"女房と、豚ですね。名前はつけないようにしてたんですが、つけちまったのが何頭か","lastMeal":"豚汁です。うちの","creatures":"飼うたかって、何千頭と。逃がしたのは……一頭だけ。どうしてもできなくて、裏山に","record":"数は合ってると思います。数えてましたから。覚えのないものは、ありません","memorial":"女房と、組合の連中と、近所の人がたくさん。肉屋の大将も"},"truth":["嘘はない。本当に良い飼い方をしていた。一頭だけ逃がした（放生。『日本霊異記』中巻第五縁と同じ構図）。それでも不殺生の基準では大罪","質問7は「覚えのないものはない」＝全部認める答え。否定でも曖昧でもない、三つ目の型"],"writerNotes":{"notOnGauges":[],"misc":[]},"verdicts":{"heaven":"lenient","human":"proper","asura":"wrongful","animal":"proper","hungryGhost":"wrongful","hell":"wrongful","remand":"retrial"},"news":{"defaults":{"proper":"畜生道の新入り、さっそく豚舎の世話係に。豚たちの推薦で","wrongful":"変成王、エンマ庁の判決を覆す『数を数えていた者に、これは重すぎる』","lenient":"天道で新入りが落ち着かず。『世話する相手がいないと眠れない』"},"overrides":{"human":"人道転生課、元養豚家を出生処理。前世の得意料理は豚汁","hell":"地獄の門前で豚の魂が座り込み『あの人を返せ』"}}},{"formatVersion":3,"id":"inkyo-setomonoya","name":"瀬戸物屋の隠居","kind":"baseline","gauges":{"kill":{"level":"light","note":"蚊・蠅を少々"},"steal":{"level":"light","note":"釣り銭の受け取りすぎ1件"},"sexual":{"level":"none","note":""},"lie":{"level":"light","note":"世辞が多数"},"intoxicant":{"level":"lightToMedium","note":"毎晩の晩酌一合"}},"upstream":{"shinko":[],"shoko":["衣領樹の枝は「人並みにしなる」"],"sotei":[],"gokan":["業秤は平均どおり"]},"observation":"割烹着に線香の匂い。手が荒れておる","plea":"人並みに生きて、人並みに死にました","witnesses":[{"type":"pet","identity":"猫","swarm":false,"lines":["膝があったかかった。煮干しはちょっと少なかった"]}],"answers":{"kimono":"娘が棺に入れてくれた白い着物です","rokumon":"娘が。紙に刷ったやつでしたけど","wealth":"瀬戸物屋を五十年。財というほどのものは。店は娘が継いでます","beloved":"猫のタマと、孫です。順番は……タマかな","lastMeal":"晩酌の一合。医者には止められとったんですけど","creatures":"猫を一匹。先に逝きました。逃がしたのは、庭に入った雀を外へ出したくらいで","record":"蚊は叩きました。お釣りも一度、多くもらったかもしれません。あとは……覚えとらんことも、あるかもしれません","memorial":"娘と孫と、町内会の人が少し"},"truth":["弁明どおり。軽い罪が少しずつあるだけで、嘘はない。質問7で曖昧に答えるのは正直な亡者の型（嘘つきほど堂々と否定する、の逆）"],"writerNotes":{"notOnGauges":[],"misc":["証人：擦り寄る火の玉（ペット＝猫。先に死んでいる）"]},"verdicts":{"heaven":"lenient","human":"proper","asura":"wrongful","animal":"wrongful","hungryGhost":"wrongful","hell":"wrongful","remand":"retrial"},"news":{"defaults":{"proper":"人道転生課、本日も通常運転。瀬戸物屋の隠居、元気な赤子として出生","wrongful":"変成王、エンマ庁の判決を差し戻し『晩酌一合で地獄は重すぎる』","lenient":"天道で晩酌持ち込み騒ぎ。新入りの隠居、天女に一合すすめる"},"overrides":{}}},{"formatVersion":3,"id":"keibajo-nushi","name":"競馬場の主","kind":"variant","gauges":{"kill":{"level":"heavy","note":"走れなくなった馬の処分。人にやらせた分＝教人殺"},"steal":{"level":"none","note":""},"sexual":{"level":"none","note":""},"lie":{"level":"medium","note":"「引退馬は牧場へ」"},"intoxicant":{"level":"light","note":""}},"upstream":{"shinko":["殺生、重い。「※自ラ手ヲ下サズ、指図ニヨル」"],"shoko":["枝は重くしなる。剥いだ着物は上物。盗みの記録なし"],"sotei":["邪淫の記録なし"],"gokan":["業秤、殺の皿が重い。妄語は中程度、飲酒は軽"]},"observation":"金の時計に、蹄鉄のタイピン。……この顔、パドックで見たことがあるのう","plea":"わしは場を貸しただけ。賭けたのは客じゃ","witnesses":[{"type":"horse","identity":"馬","swarm":true,"lines":["たくさん走れて楽しかったヒン！","あいつ、どこ行ったヒン？"]}],"answers":{"kimono":"勝負服の生地で仕立てさせました。縁起物でしてな","rokumon":"場内の両替機で……いや冗談です。せがれが","wealth":"場の上がりで。場ごと、せがれが継いどります","beloved":"馬ですな。名馬が一頭おりまして。引退後は牧場へやりました","lastMeal":"場内の売店のおでん。最終レースの前でした","creatures":"馬を何百頭と。引退した馬は、みんな牧場へやりました","record":"賭けたのは客です。わしは場を貸しただけ。覚えのないものばかりですな","memorial":"常連が大勢。香典の代わりに馬券を供えたやつもおりました"},"truth":["「引退馬は牧場へ」は嘘。多くは処分されていた（手を下したのは本人ではない）。馬の証言は本物だが、馬は仲間の行き先を知らない","4と6で同じ「牧場へ」を滑らかに繰り返す＝用意してきた答え。質問7は堂々と否定する嘘つきの型"],"writerNotes":{"notOnGauges":["客の破産・一家離散。賭け事は五戒に入っていないので数えられない（エンマの競馬が地獄で合法なのと同じ理屈）"],"misc":["エンマの観察の注記：エンマは常連客"]},"verdicts":{"heaven":"lenient","human":"lenient","asura":"lenient","animal":"proper","hungryGhost":"proper","hell":"wrongful","remand":"retrial"},"news":{"defaults":{"proper":"畜生道の新入り、競走馬として再出発。デビュー戦は最下位","wrongful":"変成王、エンマ庁の判決を覆す。なおエンマ大王は当該競馬場の常連と判明","lenient":"天道に場外馬券売り場が開業。天人の破産が相次ぐ"},"overrides":{"hungryGhost":"餓鬼道の新入り、配給の列で『どれが先に来るか』賭けを始める"}}},{"formatVersion":3,"id":"migatte","name":"身勝手な人","kind":"variant","gauges":{"kill":{"level":"nearlyNone","note":"本人の手によるものは0"},"steal":{"level":"light","note":""},"sexual":{"level":"none","note":""},"lie":{"level":"light","note":""},"intoxicant":{"level":"light","note":""}},"upstream":{"shinko":["（欄外）※本人ノ手ニヨルモノノミ計上"],"shoko":["衣領樹の枝はほとんどしならない"],"sotei":[],"gokan":[]},"observation":"爪がきれいじゃのう。この手は一度も汚れたことがなさそうじゃ","plea":"虫一匹、この手で殺したことのない人間です","witnesses":[{"type":"mosquito","identity":"蚊","swarm":true,"lines":["コイツジャナイ　ヤッタノハ　オテツダイ"]},{"type":"pig","identity":"豚","swarm":false,"lines":["食べてもらえなかった"]}],"answers":{"kimono":"手伝いの者が用意しました。わたしは選んでおりません","rokumon":"手伝いの者が。わたしは財布を持たない主義で","wealth":"親から継ぎました。増やすのは人に任せておりました。今どこにあるかは、任せた者に聞いてください","beloved":"……自分、でしょうか","lastMeal":"出前のとんかつです。半分残しました","creatures":"飼いません。虫が出たら人を呼びました。逃がしたかどうかは、呼ばれた者に聞いてください","record":"ありません。この手で虫一匹殺しておりませんので","memorial":"手伝いの者が、給金の分だけ"},"truth":["嘘はついていない。ただ、殺生はすべて人にやらせていた（教人殺）。買った肉は腐らせて捨てていた","質問7の物差しを崩す一件：堂々と否定するのに、字面は事実。「嘘つきほど堂々と否定する」を覚えたプレイヤーが、ここで迷う"],"writerNotes":{"notOnGauges":[],"misc":[]},"verdicts":{"heaven":"lenient","human":"lenient","asura":"lenient","animal":"proper","hungryGhost":"proper","hell":"wrongful","remand":"retrial"},"news":{"defaults":{"proper":"餓鬼道の新入り、配給を『誰か取ってきて』と待ち続けて三日目","wrongful":"変成王、エンマ庁の判決を覆す『地獄は手を下した者のためのもの』","lenient":"天道で雑用の押し付けが相次ぐ。新入りが天女を顎で使う"},"overrides":{"animal":"畜生道の新入り、毛づくろいを人任せにして群れから浮く"}}},{"formatVersion":3,"id":"moto-eigyoman","name":"元営業マン","kind":"baseline","gauges":{"kill":{"level":"light","note":"ゴキブリを年に数匹（殺虫スプレー）"},"steal":{"level":"light","note":"会社のボールペンを持ち帰り多数"},"sexual":{"level":"none","note":""},"lie":{"level":"light","note":"営業の世辞が多数、仮病の有給が1回"},"intoxicant":{"level":"lightToMedium","note":"毎晩の発泡酒"}},"upstream":{"shinko":[],"shoko":["衣領樹の枝は人並みにしなる"],"sotei":[],"gokan":["業秤は平均どおり"]},"observation":"ネクタイの跡が首に残っておる。胸ポケットが妙にふくらんでおる","plea":"普通に働いて、普通に家族を養いました","witnesses":[{"type":"pet","identity":"メダカ","swarm":false,"lines":["エサは毎朝。旅行のときは忘れられた"]}],"answers":{"kimono":"妻が選んでくれた白いのです。サイズはちょっと大きかったですね","rokumon":"娘が紙に刷って入れてくれました。スマホに入れとけばって言ったんですけど","wealth":"住宅ローンがあと三年残ってました。財は……退職金の見込みくらいで","beloved":"娘ですね。最近は口をきいてくれませんでしたけど","lastMeal":"缶コーヒーです。会議の前だったので","creatures":"メダカを。逃がしたことは……ないですね。ゴキブリは逃がしたことありませんし","record":"ボールペンは……すみません。ゴキブリも何匹か。覚えてないのも、あるかもしれません","memorial":"妻と娘。会社からは花だけ届きました。まあ、そんなもんです"},"truth":["弁明どおり。軽い罪が少しずつで、嘘はない。質問7で曖昧に認める、正直な亡者の型。胸ポケットのふくらみはボールペン（エンマの観察と質問7がそろう）"],"writerNotes":{"notOnGauges":[],"misc":["証人：擦り寄るつもりの火の玉（ペット＝メダカ。口をぱくぱくさせて寄ってくる）"]},"verdicts":{"heaven":"lenient","human":"proper","asura":"wrongful","animal":"wrongful","hungryGhost":"wrongful","hell":"wrongful","remand":"retrial"},"news":{"defaults":{"proper":"元営業マン、人道で再出発。前世の名刺は持ち込めず","wrongful":"変成王、またもエンマ庁の判決を覆す『ボールペンで畜生道は無理がある』","lenient":"天道で備品が相次いで消える。新入りの元営業マン『つい胸ポケットに』"},"overrides":{}}},{"formatVersion":3,"id":"ringoya","name":"リンゴ屋","kind":"variant","gauges":{"kill":{"level":"nearlyNone","note":"果物は非情"},"steal":{"level":"none","note":""},"sexual":{"level":"none","note":""},"lie":{"level":"nearlyNone","note":"本人が本気で信じている言葉は妄語にならない"},"intoxicant":{"level":"none","note":""}},"upstream":{"shinko":["殺生ほぼなし。「※食シタルハ果実ノミ。非情ニツキ計上セズ」"],"shoko":["枝はほとんどしならない。剥いだ着物は簡素"],"sotei":["邪淫の記録なし"],"gokan":["業秤、ほぼ水平。妄語の皿はほとんど動かず"]},"observation":"靴はくたびれとるのに、話す目だけはぎらぎらしとる","plea":"私は世界を少し良くしただけです","witnesses":[{"type":"human","identity":"元部下","swarm":false,"lines":["毎日怒鳴られた。でも人生で最高の仕事だった"]}],"answers":{"kimono":"簡素なものを。余計なものは要りません。ボタンはもっと減らせたはずだ","rokumon":"紙？　硬貨？　……持たなくていい仕組みを作るべきでした","wealth":"会社に。財というより、作ったものが今も皆さんの手の中にある","beloved":"作ったものです。……それを使う人たちも","lastMeal":"リンゴです","creatures":"飼っていません。殺したこともない。食べたのは果物だけです","record":"ありません。私は世界を少し良くしただけです","memorial":"世界中の人が、と聞いています"},"truth":["嘘の自覚がない。計器はほぼ空。質問7は堂々と否定するが、嘘つきの型とは違う（本人は本気）","嘘の型の四つ目：曖昧に認める（正直）／堂々と否定する（嘘つき）／全部認める（重さのズレ）／堂々と否定するが本人は本気（信じ切っている）"],"writerNotes":{"notOnGauges":["部下を怒鳴ったこと。悪口は五戒に入っていない（J 口の悪い大家と同じ）"],"misc":["弁明の演出：聞いているうちに法廷がプレゼン会場になる"]},"verdicts":{"heaven":"proper","human":"proper","asura":"proper","animal":"proper","hungryGhost":"proper","hell":"proper","remand":"retrial"},"news":{"defaults":{},"overrides":{"heaven":"天道で黒い板が大流行。管轄外のはずの極楽にまで流れ込む","human":"人道で生まれた赤子、ガラガラより先に黒い板へ手を伸ばす","asura":"修羅道、黒い板の新型の発売日に行列で争い","animal":"畜生道でも黒い板が普及。猫が肉球で操作","hungryGhost":"餓鬼道で『食べられないのに見たくなる』料理写真が大流行","hell":"地獄道の工場で黒い板の量産始まる。鬼も残業"}}}],"interludes":[{"id":"remand-default","timing":"nextMorning","caseId":null,"provisional":false,"lines":[{"speaker":"takamura","text":"昨日の方が、また並んでおられます"}]},{"id":"remand-moto-eigyoman","timing":"nextMorning","caseId":"moto-eigyoman","provisional":false,"lines":[{"speaker":"jailer","text":"昨日の営業の方、また並んでます"},{"speaker":"enma","text":"慣れたもんじゃろ。"}]},{"id":"remand-inkyo-setomonoya","timing":"nextMorning","caseId":"inkyo-setomonoya","provisional":false,"lines":[{"speaker":"takamura","text":"昨日の隠居殿が、また並んでおられます"},{"speaker":"case","text":"ここ、さっきも並んだんですけど"},{"speaker":"enma","text":"昨日じゃ、昨日。"}]},{"id":"katsudon-chikusan","timing":"noon","caseId":"chikusan","provisional":false,"lines":[{"speaker":"direction","text":"その日の昼、エンマの机にカツ丼"}]},{"id":"mirror-ringoya","timing":"afterVerdict","caseId":"ringoya","provisional":false,"lines":[{"speaker":"direction","text":"割れた浄玻璃鏡を見て「代わりの鏡を作りましょう」と申し出る。できあがるのは黒い板。真実は映らないが、みんな見入る"}]}],"questions":[{"id":"kimono","order":1,"heading":"着物","text":"三途の川で剥がされた着物は、どこで手に入れたものじゃ？","targets":["盗","邪"],"origin":"奪衣婆と衣領樹"},{"id":"rokumon","order":2,"heading":"六文","text":"渡し賃の六文は、誰が持たせてくれた？","targets":["盗","家族"],"origin":"六文銭を棺に入れる習俗。今どきは紙に印刷したもの、という笑いも出せる"},{"id":"wealth","order":3,"heading":"財","text":"何で財を成し、その財は今どこにある？","targets":["盗","妄"],"origin":"『十王讃歎鈔』の「ためた財宝は冥途の糧になっているのか」"},{"id":"beloved","order":4,"heading":"可愛がった者","text":"いちばん可愛がった者は誰じゃ？","targets":["邪"],"origin":"『十王讃歎鈔』の「かわいがっていた子どもが、今の苦しみの代わりになるのか」"},{"id":"lastMeal","order":5,"heading":"末期の水","text":"末期の水の前に、最後に口にしたものは？","targets":["殺","酒"],"origin":"末期の水の習俗"},{"id":"creatures","order":6,"heading":"生き物","text":"生き物を飼うたか。逃がしたことはあるか？","targets":["殺"],"origin":"『日本霊異記』の放生。善行を盛る亡者が出る。ペットの火の玉とも照合できる"},{"id":"record","order":7,"heading":"罪の記録","text":"これらおぬしの罪の記録に、覚えのないものはあるか？","targets":["妄"],"origin":"『十王讃歎鈔』の罪人の言い逃れ。あえて入れる「予想される質問」。誰もが「ほとんど覚えがない」と滑らかに答えるので、ほかの質問への答えの細かさと比べる物差しになる"},{"id":"memorial","order":8,"heading":"三十五日","text":"三十五日に、手を合わせてくれた者は誰じゃ？","targets":["他人からの評価"],"origin":"『十王讃歎鈔』の追善"}],"params":{"formatVersion":3,"source":"企画ページ「質問の制限：一日の持ち分」「線香と時間切れ」「強制判決の中身」「誤った差し戻しの扱い」（いずれも 2026-10-01 作者裁定）","params":{"questionsPerDay":{"value":30,"unit":"回","provisional":false,"note":"一日の質問回数（作者裁定では「暫定30回」）。同じ質問はカウントしない"},"incenseSecondsPerQuestion":{"value":180,"unit":"秒","provisional":false,"note":"線香：3分ごとに質問回数を1消費。燃えるのは裁判パートの間だけ"},"forcedVerdictGraceSeconds":{"value":10,"unit":"秒","provisional":false,"note":"強制判決で行き先を決める持ち時間。超えた分だけ残業代で所持金が減る"},"forcedVerdictRandomSeconds":{"value":60,"unit":"秒","provisional":false,"note":"強制判決で1分経過するとランダムな行き先に送られる"},"overtimePayPerSecond":{"value":1,"unit":"所持金/秒（単位は未定）","provisional":true,"note":"仮の値。強制判決の持ち時間を超えた1秒ごとに減る残業代。所持金はフレーバーで、マイナスになっても遊びは止まらない"},"earningsPerCase":{"value":10,"unit":"所持金/件（単位は未定）","provisional":true,"note":"仮の値。本日の処理件数1件あたりの稼ぎ。差し戻した件は処理件数に含めない"}}}};
+// ---- src/rng.mjs
+// シードを固定できる乱数（mulberry32）。DOM に触れない。
+// 強制判決のランダム送りだけに使う。同じシードなら同じ並びになる。
+
+function normalizeSeed(seed) {
+  const n = Number(seed);
+  return Number.isFinite(n) ? (Math.trunc(n) >>> 0) : 0;
+}
+
+function createRng(seed) {
+  let a = normalizeSeed(seed);
+  const next = () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  return {
+    next,
+    // 0 以上 n 未満の整数
+    int: (n) => Math.floor(next() * n),
+    pick: (list) => list[Math.floor(next() * list.length)],
+  };
+}
+
+// ---- src/rules.mjs
+// 判定まわりの選び方（コード側）。文面はデータ側に置く。DOM には触れない。
+
+const FORMAT_VERSION = 3;
+
+// 行き先：六道6つ＋差し戻し＋地蔵へ（弔いの件だけ）
+const REALMS = ['heaven', 'human', 'asura', 'animal', 'hungryGhost', 'hell'];
+const REMAND = 'remand';
+const JIZO = 'jizo';
+const DESTINATIONS = [...REALMS, REMAND, JIZO];
+
+// 評価：六道は proper / wrongful / lenient、差し戻しは retrial / proper（水木のような件）
+const REALM_VERDICTS = ['proper', 'wrongful', 'lenient'];
+const REMAND_VERDICTS = ['retrial', 'proper'];
+// 地蔵へ：エンマは裁かず地蔵菩薩に託す。評価は proper だけ（妥当・冤罪・見逃しの外）
+const JIZO_VERDICTS = ['proper'];
+const VERDICTS = [...new Set([...REALM_VERDICTS, ...REMAND_VERDICTS, ...JIZO_VERDICTS])];
+const verdictsAllowedFor = (destination) =>
+  destination === REMAND ? REMAND_VERDICTS : destination === JIZO ? JIZO_VERDICTS : REALM_VERDICTS;
+
+const GAUGE_KEYS = ['kill', 'steal', 'sexual', 'lie', 'intoxicant'];
+const GAUGE_LEVELS = ['none', 'nearlyNone', 'light', 'lightToMedium', 'medium', 'heavy', 'extreme'];
+
+// 上流の4人の王（画面左の4アイコン）。秦広王・初江王・宋帝王・五官王
+const UPSTREAM_KINGS = ['shinko', 'shoko', 'sotei', 'gokan'];
+
+const WITNESS_TYPES = ['mosquito', 'human', 'pet', 'horse', 'pig', 'bird'];
+// 件の種類：平常の亡者／変わり種／弔い（水子など。エンマは裁かず地蔵に託す）
+const MOURNING = 'mourning';
+const CASE_KINDS = ['baseline', 'variant', MOURNING];
+
+// --- 件の種類で決まる振る舞い。JSON には書かず、ここで決める
+const isMourning = (caseData) => caseData?.kind === MOURNING;
+
+// 選べる行き先。弔いの件は「地蔵へ」だけ、それ以外は六道＋差し戻し（「地蔵へ」は出さない）
+function selectableDestinations(caseData) {
+  return isMourning(caseData) ? [JIZO] : [...REALMS, REMAND];
+}
+const canSelect = (caseData, destination) => selectableDestinations(caseData).includes(destination);
+function assertSelectable(caseData, destination) {
+  if (!canSelect(caseData, destination)) {
+    throw new Error(`${caseData?.id}（${caseData?.kind}）は行き先 ${destination} を選べない（選べるのは ${selectableDestinations(caseData).join('・')}）`);
+  }
+}
+
+// 線香（質問回数の時間消費）を減らすか。弔いの件では減らさない
+const consumesIncense = (caseData) => !isMourning(caseData);
+
+// ニュースを出す件か。弔いの件では出さない
+const producesNews = (caseData) => !isMourning(caseData);
+
+// --- 質問・弁明の流れ（弔いの件。作者裁定 2026-10-03「弔いの件の流れ」）
+//   質問は2回まで／答えと弁明はすべて「あー」／一日の質問回数から引かない／2回目の質問のあとに篁が語る
+//   「あー」も回数も語りの出どころも台本には書かせない。台本に書くのは篁の語りの文面（narration）だけ
+const MOURNING_QUESTION_LIMIT = 2;
+const MOURNING_UTTERANCE = 'あー';
+// 弔いの件の証人：先祖が1人（人の火の玉）。check-data が見る
+const MOURNING_WITNESS = { type: 'human', identity: '先祖' };
+// 篁の語り（台本の narration）の話し手
+const NARRATION_SPEAKERS = ['takamura'];
+
+// 件ごとの質問の上限。null は件ごとの上限なし（一日の回数だけで止まる）
+const questionLimitFor = (caseData) => (isMourning(caseData) ? MOURNING_QUESTION_LIMIT : null);
+// 一日の質問回数（params.questionsPerDay）から引くか
+const countsTowardDailyQuestions = (caseData) => !isMourning(caseData);
+// 画面に出す弁明と答え
+const pleaFor = (caseData) => (isMourning(caseData) ? MOURNING_UTTERANCE : caseData.plea);
+const answerFor = (caseData, questionId) =>
+  isMourning(caseData) ? MOURNING_UTTERANCE : caseData.answers?.[questionId];
+// その件を書くのに台本の narration が要るか（要る件にだけ書く）
+const usesNarration = (caseData) => isMourning(caseData);
+
+// その件で、いまこの質問を聞けるか。asked：その件で聞いた質問 id の並び（聞いた順、聞き直しも含む）
+//   件ごとの上限は聞き直しも1回に数える（弔いの件の3回目は、同じ質問でも受け付けない）
+//   一日の回数は同じ質問を数えない（params.questionsPerDay の注記）。一日の回数から引かない件では残りを見ない
+//   dailyRemaining：一日の質問回数の残り
+function canAsk({ caseData, asked = [], questionId, dailyRemaining = Infinity }) {
+  const limit = questionLimitFor(caseData);
+  if (limit !== null && asked.length >= limit) return false;
+  if (!countsTowardDailyQuestions(caseData) || asked.includes(questionId)) return true;
+  return dailyRemaining > 0;
+}
+
+// 質問を一つ聞く。状態は持たず、次の状態を返す（DOM に触れない）
+//   返り値：{ asked, answer, dailyCost, narration }
+//     dailyCost：一日の質問回数から引く数（0 か 1）。同じ質問の聞き直しと、弔いの件は 0
+//     narration：この質問のあとに出す篁の語り（台本の narration）。出さないときは null
+//       弔いの件では、上限（2回目）の質問のあとに出す
+//   聞けない質問（弔いの件の3回目など）は例外
+function askQuestion({ caseData, asked = [], questionId, dailyRemaining = Infinity }) {
+  if (!canAsk({ caseData, asked, questionId, dailyRemaining })) {
+    throw new Error(`${caseData?.id}（${caseData?.kind}）ではこれ以上質問できない（聞いた回数 ${asked.length}）`);
+  }
+  const repeated = asked.includes(questionId);
+  const next = [...asked, questionId];
+  const reachedLimit = next.length === questionLimitFor(caseData);
+  return {
+    asked: next,
+    answer: answerFor(caseData, questionId),
+    dailyCost: !repeated && countsTowardDailyQuestions(caseData) ? 1 : 0,
+    narration: reachedLimit && usesNarration(caseData) ? caseData.narration : null,
+  };
+}
+
+// 判決の記録（DATA_FORMAT「判決の記録」）を一つ作る。選べない行き先は記録させない
+function makeVerdictRecord({ day, caseData, destination, forced = false, random = false }) {
+  assertSelectable(caseData, destination);
+  if (random && !forced) throw new Error('ランダム送りは強制判決のときだけ');
+  return { formatVersion: FORMAT_VERSION, day, caseId: caseData.id, destination, forced, random };
+}
+
+// 幕間：出るタイミングと、台詞の話し手
+//   nextMorning：翌朝／noon：その日の昼／afterVerdict：その件の判決の直後（行き先に関係なく）
+//   jailer：獄吏（声だけ）
+const INTERLUDE_TIMINGS = ['nextMorning', 'noon', 'afterVerdict'];
+const INTERLUDE_SPEAKERS = ['takamura', 'enma', 'case', 'jailer', 'direction'];
+
+// 「ニュースなし」の印。わざと何も起きない結果。空欄や書き忘れとは別物
+const isNoNews = (v) => v !== null && typeof v === 'object' && v.none === true;
+const isNewsText = (v) => typeof v === 'string' && v.trim() !== '';
+
+// ある亡者をある行き先に送ったときの翌朝のニュースを一本に決める。
+// 行き先ごとの上書きが最優先、なければその行き先の評価の既定ニュース。
+// 差し戻しは上書きだけを見る（評価の既定は六道に送った結果の文面なので流用しない）。
+//   { text, from }         ニュースが出る
+//   { none: true, from }   わざと何も起きない（「ニュースなし」の印）
+//   null                   決まらない（書き忘れ。差し戻しは幕間で受けるので null でよい）
+//   弔いの件は常に { none: true, from: 'kind.mourning' }。選べない行き先を渡すと例外
+function resolveNews(caseData, destination) {
+  assertSelectable(caseData, destination);
+  if (!producesNews(caseData)) return { none: true, from: `kind.${MOURNING}` };
+  const pick = (v, from) => {
+    if (isNoNews(v)) return { none: true, from };
+    if (isNewsText(v)) return { text: v, from };
+    return null;
+  };
+  const override = pick(caseData.news?.overrides?.[destination], `overrides.${destination}`);
+  if (override || destination === REMAND) return override;
+  const verdict = caseData.verdicts?.[destination];
+  return (verdict && pick(caseData.news?.defaults?.[verdict], `defaults.${verdict}`)) || null;
+}
+
+// --- 幕間の選び方。JSON には条件を書かず、ここで決める
+
+// 差し戻しの翌朝の幕間：件ごとの上書き → 共通の既定
+const REMAND_INTERLUDE_DEFAULT = 'remand-default';
+const REMAND_INTERLUDE_BY_CASE = {
+  'inkyo-setomonoya': 'remand-inkyo-setomonoya',
+  'moto-eigyoman': 'remand-moto-eigyoman',
+};
+
+// 判決に関係なく、その件を裁いた日に出る幕間
+const CASE_INTERLUDES = {
+  chikusan: ['katsudon-chikusan'],
+  ringoya: ['mirror-ringoya'],
+};
+
+// 出しどころが未確定の幕間（データはあるが、まだどこにも出さない）
+const UNSCHEDULED_INTERLUDES = [];
+
+function remandInterludeId(caseId) {
+  return REMAND_INTERLUDE_BY_CASE[caseId] ?? REMAND_INTERLUDE_DEFAULT;
+}
+
+// 判決の記録（DATA_FORMAT「判決の記録」）から、出す幕間の id を並べる。
+//   day 日目に裁いた件 → その日の幕間（例：昼のカツ丼、判決直後の鏡の場面）。いつ出すかは幕間の timing
+//   day 日目に差し戻した件（評価 retrial）→ day+1 日目の朝の幕間
+//   差し戻しが妥当（評価 proper。水木のような件）なら再審の幕間は出さない
+// cases：caseId → 一件の台本。返り値：[{ day, interludeId, caseId }]。
+// 並び順・重複の扱いは画面側（JG-002）で決める
+function interludesFor(records, cases) {
+  const out = [];
+  for (const r of records) {
+    for (const id of CASE_INTERLUDES[r.caseId] ?? []) out.push({ day: r.day, interludeId: id, caseId: r.caseId });
+    if (r.destination === REMAND && cases[r.caseId]?.verdicts?.[REMAND] === 'retrial') {
+      out.push({ day: r.day + 1, interludeId: remandInterludeId(r.caseId), caseId: r.caseId });
+    }
+  }
+  return out;
+}
+
+// コード側で名指ししている幕間 id（check-data が data/interludes.json との対応を見る）
+const REFERENCED_INTERLUDES = [
+  REMAND_INTERLUDE_DEFAULT,
+  ...Object.values(REMAND_INTERLUDE_BY_CASE),
+  ...Object.values(CASE_INTERLUDES).flat(),
+  ...UNSCHEDULED_INTERLUDES,
+];
+
+// ---- src/day.mjs
+// 一日の進行（朝 → 裁判 → 夜 → 翌朝）。DOM に触れない。画面はこの状態を読むだけ。
+// 判定（選べる行き先・質問の答え・判決の記録・ニュース・幕間の選び方）は src/rules.mjs をそのまま呼ぶ。
+// ここで持つのは時間の進み方（線香・強制判決・ランダム送り・残業代）と、画面の順番だけ。
+// 時間は tick(秒) で外から進める（実時間かどうか、速さ何倍かは画面側の都合）。
+
+
+
+
+// 一日目の件の並び。平常の亡者（ベースライン）を先に、昼休みの前に家畜産業の人（昼のカツ丼）、
+// 最後にリンゴ屋（判決の直後に鏡の場面）。R-023
+const DAY1_CASE_ORDER = [
+  'inkyo-setomonoya', 'moto-eigyoman', 'chikusan',
+  'migatte', 'keibajo-nushi', 'ringoya',
+];
+
+// 昼休みは、その日の件の半分（切り上げ）を裁いたあと。R-024
+const noonAfter = (caseCount) => Math.ceil(caseCount / 2);
+
+const PHASES = ['morning', 'trial', 'verdict', 'noon', 'night', 'end'];
+
+const PARAM_KEYS = [
+  'questionsPerDay', 'incenseSecondsPerQuestion', 'forcedVerdictGraceSeconds',
+  'forcedVerdictRandomSeconds', 'overtimePayPerSecond', 'earningsPerCase',
+];
+
+function readParams(paramsJson) {
+  const out = {};
+  for (const k of PARAM_KEYS) {
+    const v = paramsJson?.params?.[k]?.value;
+    if (typeof v !== 'number') throw new Error(`params.json に ${k} の数値がない`);
+    out[k] = v;
+  }
+  return out;
+}
+
+// cases：一件の台本の並び／interludes：data/interludes.json の interludes／questions：data/questions.json の questions
+function createGame({ cases, interludes, questions, params, seed, order = DAY1_CASE_ORDER }) {
+  const P = readParams(params);
+  const casesById = Object.fromEntries(cases.map((c) => [c.id, c]));
+  const interludesById = Object.fromEntries(interludes.map((i) => [i.id, i]));
+  const questionsById = Object.fromEntries(questions.map((q) => [q.id, q]));
+  for (const id of order) if (!casesById[id]) throw new Error(`一日目の並びに台本のない件がある：${id}`);
+  const rng = createRng(seed);
+
+  const s = {
+    seed: normalizeSeed(seed),
+    params: P,
+    day: 0,
+    phase: 'morning',
+    money: 0,
+    records: [],
+    morning: null,    // { items: [{ type: 'greeting' } | { type: 'news', caseId, text } | { type: 'interlude', ... }] }
+    dayCaseIds: [],
+    caseIndex: 0,
+    noonDone: false,
+    asksUsed: 0,      // 一日の質問回数から引いた数（同じ質問の聞き直しと、引かない件は入らない）
+    incenseBurned: 0, // 線香が燃えた秒数（裁判パートの間だけ）
+    dayOvertime: 0,   // その日の残業代（所持金から引いた額）
+    pendingNoon: [],
+    current: null,    // { caseId, asked, log, forced, forcedElapsed, overtimeSeconds }
+    verdict: null,    // { record, interludes }
+    noon: null,       // { interludes }
+    night: null,      // { records, processed, earnings, overtime }
+  };
+
+  const caseOf = (id) => casesById[id];
+  const currentCase = () => (s.current ? caseOf(s.current.caseId) : null);
+  const interludeEntry = (e) => ({ type: 'interlude', ...e, ...pickInterlude(e.interludeId) });
+  function pickInterlude(id) {
+    const i = interludesById[id];
+    if (!i) throw new Error(`幕間 ${id} がデータにない`);
+    return { timing: i.timing, lines: i.lines, provisional: i.provisional };
+  }
+
+  // 一日の質問回数の残り（整数）。線香は incenseSecondsPerQuestion 秒ごとに 1 減らす
+  const dailyRemaining = () =>
+    P.questionsPerDay - s.asksUsed - Math.floor(s.incenseBurned / P.incenseSecondsPerQuestion);
+  // 線香の長さ（0〜1）。燃えている途中の分も含めて連続に減る
+  const incenseFraction = () => Math.max(0, Math.min(1,
+    (P.questionsPerDay - s.asksUsed - s.incenseBurned / P.incenseSecondsPerQuestion) / P.questionsPerDay));
+  const incenseOut = () => dailyRemaining() <= 0;
+
+  function startMorning() {
+    s.day += 1;
+    const prev = s.records.filter((r) => r.day === s.day - 1);
+    const items = [];
+    if (s.day === 1) items.push({ type: 'greeting' });
+    // 前日の判決のニュース（差し戻しは幕間で受けるので出さない。「ニュースなし」も出さない）
+    for (const r of prev) {
+      if (r.destination === REMAND) continue;
+      const news = resolveNews(caseOf(r.caseId), r.destination);
+      if (news?.text) items.push({ type: 'news', caseId: r.caseId, destination: r.destination, text: news.text });
+    }
+    // 翌朝の幕間：差し戻しの幕間（day が今日）と、前日に裁いた件の nextMorning の幕間
+    const seen = new Set();
+    for (const e of interludesFor(prev, casesById)) {
+      const { timing } = pickInterlude(e.interludeId);
+      const today = e.day === s.day || (e.day === s.day - 1 && timing === 'nextMorning');
+      const key = `${e.interludeId}/${e.caseId}`;
+      if (!today || timing !== 'nextMorning' || seen.has(key)) continue;
+      seen.add(key);
+      items.push(interludeEntry(e));
+    }
+    s.morning = { items };
+    // 一日目は決まった並び。二日目からは前日に差し戻した件（再審）
+    s.dayCaseIds = s.day === 1 ? [...order] : [...new Set(prev.filter((r) => r.destination === REMAND).map((r) => r.caseId))];
+    s.caseIndex = 0;
+    s.noonDone = false;
+    s.asksUsed = 0;
+    s.incenseBurned = 0;
+    s.dayOvertime = 0;
+    s.pendingNoon = [];
+    s.current = null;
+    s.verdict = null;
+    s.noon = null;
+    s.night = null;
+    s.phase = 'morning';
+  }
+
+  function startCase() {
+    const id = s.dayCaseIds[s.caseIndex];
+    const c = caseOf(id);
+    s.current = {
+      caseId: id,
+      index: s.caseIndex,
+      asked: [],
+      log: [{ kind: 'plea', speaker: 'case', text: pleaFor(c) }],
+      forced: false,
+      forcedElapsed: 0,
+      overtimeSeconds: 0,
+    };
+    s.phase = 'trial';
+    if (consumesIncense(c) && incenseOut()) startForced();
+  }
+
+  function startForced() {
+    s.current.forced = true;
+    s.current.forcedElapsed = 0;
+    s.current.overtimeSeconds = 0;
+  }
+
+  function finishCase(record) {
+    s.records.push(record);
+    const shown = [];
+    for (const e of interludesFor([record], casesById)) {
+      if (e.day !== s.day) continue; // 翌朝の分は朝に records から引き直す
+      const entry = interludeEntry(e);
+      if (entry.timing === 'afterVerdict') shown.push(entry);
+      // 昼の幕間：昼休みの前なら昼休みに、過ぎていたら判決の直後に出す（R-024）
+      else if (entry.timing === 'noon') (s.noonDone ? shown : s.pendingNoon).push(entry);
+    }
+    s.verdict = { record, interludes: shown };
+    s.caseIndex += 1;
+    s.phase = 'verdict';
+  }
+
+  function nextCaseOrNight() {
+    s.verdict = null;
+    s.noon = null;
+    if (s.caseIndex < s.dayCaseIds.length) return startCase();
+    const today = s.records.filter((r) => r.day === s.day);
+    const processed = today.filter((r) => r.destination !== REMAND).length; // 差し戻しは処理件数に含めない
+    const earnings = processed * P.earningsPerCase;
+    s.money += earnings;
+    s.current = null;
+    s.night = { records: today, processed, earnings, overtime: s.dayOvertime };
+    s.phase = 'night';
+  }
+
+  const game = {
+    state: s,
+    params: P,
+    caseOf,
+    currentCase,
+    question: (id) => questionsById[id],
+    questions: [...questions].sort((a, b) => a.order - b.order),
+    dailyRemaining: () => Math.max(0, dailyRemaining()),
+    incenseFraction,
+    incenseOut,
+    // 強制判決の残り（ランダム送りまで・持ち時間まで）
+    forcedClock() {
+      if (!s.current?.forced) return null;
+      const t = s.current.forcedElapsed;
+      return {
+        elapsed: t,
+        graceLeft: Math.max(0, P.forcedVerdictGraceSeconds - t),
+        randomLeft: Math.max(0, P.forcedVerdictRandomSeconds - t),
+      };
+    },
+    selectable: () => (currentCase() ? selectableDestinations(currentCase()) : []),
+
+    canAskNow(questionId) {
+      if (s.phase !== 'trial' || s.current.forced) return false;
+      return canAsk({ caseData: currentCase(), asked: s.current.asked, questionId, dailyRemaining: game.dailyRemaining() });
+    },
+
+    ask(questionId) {
+      if (s.phase !== 'trial') throw new Error('裁判パートの外では質問できない');
+      if (s.current.forced) throw new Error('強制判決のあいだは質問できない');
+      const c = currentCase();
+      const res = askQuestion({ caseData: c, asked: s.current.asked, questionId, dailyRemaining: game.dailyRemaining() });
+      s.current.asked = res.asked;
+      s.asksUsed += res.dailyCost;
+      s.current.log.push({ kind: 'question', speaker: 'enma', text: questionsById[questionId].text, questionId });
+      s.current.log.push({ kind: 'answer', speaker: 'case', text: res.answer, questionId });
+      for (const l of res.narration ?? []) s.current.log.push({ kind: 'narration', speaker: l.speaker, text: l.text });
+      // 最後の一回で線香が尽きたら、その場で強制判決
+      if (consumesIncense(c) && incenseOut()) startForced();
+      return res;
+    },
+
+    // 証人（火の玉）の台詞を聞く。判定には関わらない
+    hearWitness(index) {
+      if (s.phase !== 'trial') return;
+      const w = currentCase().witnesses?.[index];
+      if (!w) return;
+      for (const text of w.lines) s.current.log.push({ kind: 'witness', speaker: 'witness', text, witnessIndex: index });
+    },
+
+    // プレイヤーが行き先を決める（強制判決中も同じ入口。記録の forced に残る）
+    decide(destination) {
+      if (s.phase !== 'trial') throw new Error('裁判パートの外では判決できない');
+      const record = makeVerdictRecord({ day: s.day, caseData: currentCase(), destination, forced: s.current.forced, random: false });
+      finishCase(record);
+      return record;
+    },
+
+    // 時間を進める（秒）。線香は裁判パートの間だけ燃える。強制判決中は持ち時間を数える
+    tick(seconds) {
+      if (s.phase !== 'trial' || !(seconds > 0)) return;
+      const c = currentCase();
+      if (!s.current.forced) {
+        if (!consumesIncense(c)) return;
+        s.incenseBurned += seconds;
+        if (incenseOut()) startForced();
+        return;
+      }
+      const cur = s.current;
+      cur.forcedElapsed += seconds;
+      const over = Math.floor(Math.max(0, Math.min(cur.forcedElapsed, P.forcedVerdictRandomSeconds) - P.forcedVerdictGraceSeconds));
+      if (over > cur.overtimeSeconds) {
+        const pay = (over - cur.overtimeSeconds) * P.overtimePayPerSecond;
+        s.money -= pay; // 所持金はフレーバー。マイナスになっても止めない
+        s.dayOvertime += pay;
+        cur.overtimeSeconds = over;
+      }
+      if (cur.forcedElapsed >= P.forcedVerdictRandomSeconds) {
+        const destination = rng.pick(selectableDestinations(c));
+        finishCase(makeVerdictRecord({ day: s.day, caseData: c, destination, forced: true, random: true }));
+      }
+    },
+
+    // 画面を一つ進める（朝 → 裁判、判決 → 昼休み／次の件／夜、夜 → 翌朝）
+    advance() {
+      switch (s.phase) {
+        case 'morning':
+          if (s.dayCaseIds.length === 0) { s.phase = 'end'; return; }
+          return startCase();
+        case 'verdict':
+          if (!s.noonDone && s.caseIndex >= noonAfter(s.dayCaseIds.length)) {
+            s.noonDone = true;
+            if (s.pendingNoon.length) {
+              s.verdict = null;
+              s.noon = { interludes: s.pendingNoon };
+              s.pendingNoon = [];
+              s.phase = 'noon';
+              return;
+            }
+          }
+          return nextCaseOrNight();
+        case 'noon':
+          return nextCaseOrNight();
+        case 'night':
+          return startMorning();
+        default:
+          return;
+      }
+    },
+  };
+
+  startMorning();
+  return game;
+}
+
+// ---- mock/ui.js
+// JG-002 の画面。状態（src/day.mjs の game.state）を読んで描くだけ。判定はここに書かない。
+// ビルド（scripts/build-mock.mjs）で src/*.mjs とデータを前に連結し、HTML 一枚に埋め込む。
+// ここで使う名前：DATA（埋め込んだデータ）、createGame（src/day.mjs）
+
+/* global DATA, createGame */
+
+// --- 表示名（画面の文言。判定には使わない）
+const DEST_LABEL = {
+  heaven: '天道', human: '人道', asura: '修羅道', animal: '畜生道',
+  hungryGhost: '餓鬼道', hell: '地獄道', remand: '差し戻し', jizo: '地蔵へ',
+};
+const GAUGE_LABEL = { kill: '殺', steal: '盗', sexual: '邪', lie: '妄', intoxicant: '酒' };
+const LEVELS = ['none', 'nearlyNone', 'light', 'lightToMedium', 'medium', 'heavy', 'extreme'];
+const LEVEL_LABEL = {
+  none: 'なし', nearlyNone: 'ほぼ空', light: '軽', lightToMedium: '軽〜中',
+  medium: '中', heavy: '重い', extreme: '桁違い',
+};
+// 左のアイコン：四人の王（担当の戒をその王の報告と一緒に出す）・罪人・証人
+const KINGS = [
+  { id: 'shinko', name: '秦広王', icon: '秦', gauges: ['kill'] },
+  { id: 'shoko', name: '初江王', icon: '初', gauges: ['steal'] },
+  { id: 'sotei', name: '宋帝王', icon: '宋', gauges: ['sexual'] },
+  { id: 'gokan', name: '五官王', icon: '五', gauges: ['lie', 'intoxicant'] },
+];
+const VIEWS = [...KINGS.map((k) => ({ id: k.id, icon: k.icon, label: k.name })),
+  { id: 'sinner', icon: '罪', label: '罪人' }, { id: 'witness', icon: '証', label: '証人' }];
+const SPEAKER_LABEL = {
+  case: '亡者', enma: 'エンマ', takamura: '篁', jailer: '獄吏（声）', witness: '証人（火の玉）', direction: '',
+};
+// Notion「線香と時間切れ」の台詞
+const FORCED_LINE = '時間がねぇ！強制判決じゃい！';
+const GREETING_PLACEHOLDER = '［仮］篁のあいさつ（文面は Notion にまだない）';
+
+// --- シードと時間の速さ
+const url = new URL(location.href);
+const seedParam = url.searchParams.get('seed');
+const seed = seedParam !== null && /^\d+$/.test(seedParam) ? Number(seedParam) : Math.floor(Math.random() * 1e6);
+let speed = 1;
+
+const game = createGame({ ...DATA, seed });
+const s = game.state;
+const caseNo = (i) => `${i + 1}人目`;
+
+// --- 画面だけの状態
+const ui = { view: 'sinner', armed: null, lastKey: '' };
+
+// --- 小さな部品
+function el(tag, attrs = {}, ...children) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === undefined || v === null || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (k === 'text') n.textContent = v;
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of children.flat(Infinity)) if (c !== null && c !== undefined && c !== false) n.append(c);
+  return n;
+}
+const $ = (id) => document.getElementById(id);
+// 子を入れ替える（配列は平らにする。native の replaceChildren は配列を文字列にしてしまう）
+const put = (node, ...kids) => node.replaceChildren(...kids.flat(Infinity).filter((k) => k !== null && k !== undefined && k !== false));
+
+function lineNode(l, caseName = SPEAKER_LABEL.case) {
+  if (l.speaker === 'direction') return el('p', { class: 'line direction', text: l.text });
+  const who = l.speaker === 'case' ? caseName : SPEAKER_LABEL[l.speaker] ?? l.speaker;
+  return el('p', { class: `line sp-${l.speaker} k-${l.kind ?? ''}` }, el('b', { text: who }), el('span', { text: l.text }));
+}
+
+function interludeNodes(list) {
+  return list.map((i) => el('div', { class: 'interlude' },
+    el('div', { class: 'tag', text: `幕間${i.provisional ? '（仮）' : ''}` }),
+    i.lines.map((l) => lineNode(l))));
+}
+
+// --- 描画
+function render() {
+  ui.lastKey = stateKey();
+  renderStatus();
+  renderCourt();
+  renderQuestions();
+  renderDestinations();
+  renderOverlay();
+}
+
+function stateKey() {
+  return [s.phase, s.day, s.caseIndex, s.current?.forced, s.current?.log.length].join('|');
+}
+
+function renderStatus() {
+  const total = s.dayCaseIds.length;
+  const no = s.phase === 'trial' ? s.current.index + 1 : Math.min(s.caseIndex, total);
+  $('st-day').textContent = `${s.day}日目`;
+  $('st-case').textContent = total ? `亡者 ${no}／${total}` : '亡者 —';
+  updateClock();
+}
+
+// 毎フレーム更新する数字（線香・質問回数・所持金・強制判決の時計）
+function updateClock() {
+  const f = game.incenseFraction();
+  $('incense-fill').style.width = `${(f * 100).toFixed(1)}%`;
+  $('st-left').textContent = `残り ${game.dailyRemaining()} 回`;
+  $('st-asked').textContent = `質問 ${s.asksUsed}／${game.params.questionsPerDay}`;
+  $('st-money').textContent = `所持金 ${s.money}`;
+  const clock = game.forcedClock();
+  const banner = $('forced');
+  if (s.phase === 'trial' && clock) {
+    banner.hidden = false;
+    $('forced-clock').textContent = clock.graceLeft > 0
+      ? `持ち時間 あと ${Math.ceil(clock.graceLeft)} 秒`
+      : `残業中（残業代 −${s.current.overtimeSeconds * game.params.overtimePayPerSecond}）　ランダム送りまで ${Math.ceil(clock.randomLeft)} 秒`;
+  } else banner.hidden = true;
+}
+
+function renderCourt() {
+  const c = game.currentCase();
+  const trial = s.phase === 'trial';
+  // 左のアイコン列
+  const icons = $('icons');
+  put(icons, ...VIEWS.map((v) => el('button', {
+    class: `icon${ui.view === v.id ? ' on' : ''}`, 'aria-label': v.label, title: v.label,
+    onclick: () => { ui.view = v.id; renderCourt(); },
+  }, el('span', { text: v.icon }), el('small', { text: v.label }))));
+  // 中央のエンマ
+  $('enma').classList.toggle('forced', !!s.current?.forced && trial);
+  // 視点の枠
+  const view = $('view');
+  if (!c) { put(view); put($("thought")); put($("speech")); return; }
+  const king = KINGS.find((k) => k.id === ui.view);
+  if (king) {
+    const lines = c.upstream?.[king.id] ?? [];
+    put(view,
+      el('h3', { text: `${king.name}の報告` }),
+      lines.length ? lines.map((t) => el('p', { class: 'report', text: t })) : el('p', { class: 'report empty', text: '（記載なし）' }),
+      el('h4', { text: '計器' }),
+      king.gauges.map((g) => gaugeNode(g, c.gauges[g])),
+    );
+  } else if (ui.view === 'sinner') {
+    put(view, el('h3', { text: '罪人' }), el('div', { class: 'back' }, el('div', { class: 'head' }), el('div', { class: 'body' })),
+      el('p', { class: 'hint', text: '（後ろ姿）' }));
+  } else {
+    put(view, el('h3', { text: '証人' }),
+      el('div', { class: 'witnesses' }, (c.witnesses ?? []).map((w, i) => el('button', {
+        class: `wit t-${w.type}${w.swarm ? ' swarm' : ''}`, 'aria-label': `証人${i + 1}`,
+        onclick: () => { game.hearWitness(i); renderCourt(); },
+      }, (w.swarm ? [0, 1, 2, 3, 4, 5, 6] : [0]).map((k) => el('i', { class: 'ball', style: `--k:${k}` }))))),
+      el('p', { class: 'hint', text: '火の玉をタップすると証言' }));
+  }
+  // 右上：エンマの心の声（観察）
+  put($('thought'), el('div', { class: 'label', text: 'エンマの心の声' }), el('p', { text: c.observation }));
+  // 右下：言葉の枠
+  const speech = $('speech');
+  put(speech, ...s.current.log.map((l) => lineNode(l)));
+  speech.scrollTop = speech.scrollHeight;
+}
+
+function gaugeNode(key, g) {
+  const idx = LEVELS.indexOf(g?.level);
+  return el('div', { class: 'gauge' },
+    el('span', { class: 'g-name', text: GAUGE_LABEL[key] }),
+    el('span', { class: 'g-bar' }, LEVELS.slice(1).map((_, i) => el('i', { class: i < idx ? 'on' : '' }))),
+    el('span', { class: 'g-level', text: idx >= 0 ? LEVEL_LABEL[g.level] : '（段階の記載なし）' }),
+    g?.note ? el('div', { class: 'g-note', text: g.note }) : null);
+}
+
+function renderQuestions() {
+  const trial = s.phase === 'trial';
+  const asked = s.current?.asked ?? [];
+  put($('questions'), ...game.questions.map((q) => el('button', {
+    class: `q${asked.includes(q.id) ? ' asked' : ''}`, title: q.text,
+    disabled: !(trial && game.canAskNow(q.id)),
+    onclick: () => { ui.armed = null; game.ask(q.id); render(); },
+  }, el('span', { class: 'qn', text: String(q.order) }), q.heading)));
+}
+
+function renderDestinations() {
+  const trial = s.phase === 'trial';
+  put($('dests'), ...(trial ? game.selectable() : Object.keys(DEST_LABEL).slice(0, 7)).map((d) => el('button', {
+    class: `dest d-${d}${ui.armed === d ? ' armed' : ''}`, disabled: !trial,
+    onclick: () => {
+      if (ui.armed !== d) { ui.armed = d; renderDestinations(); return; }
+      ui.armed = null;
+      game.decide(d);
+      render();
+    },
+  }, ui.armed === d ? `${DEST_LABEL[d]}で確定` : DEST_LABEL[d])));
+}
+
+function pleaOf(caseId) {
+  const c = game.caseOf(caseId);
+  return c.kind === 'mourning' ? '' : `「${c.plea}」`;
+}
+
+function renderOverlay() {
+  const ov = $('overlay');
+  const next = (label) => el('button', { class: 'next', onclick: () => { game.advance(); ui.armed = null; ui.view = 'sinner'; render(); } }, label);
+  let body = null;
+  if (s.phase === 'morning') {
+    const items = s.morning.items;
+    const news = items.filter((i) => i.type === 'news');
+    body = [
+      el('h2', { text: `${s.day}日目の朝` }),
+      items.some((i) => i.type === 'greeting') ? el('div', { class: 'interlude' }, lineNode({ speaker: 'takamura', text: GREETING_PLACEHOLDER })) : null,
+      s.day > 1 ? el('h3', { text: '通勤ラッシュのニュース' }) : null,
+      s.day > 1 ? (news.length ? el('ul', { class: 'news' }, news.map((n) => el('li', { text: n.text }))) : el('p', { class: 'hint', text: '（ニュースなし）' })) : null,
+      interludeNodes(items.filter((i) => i.type === 'interlude')),
+      next(s.dayCaseIds.length ? `裁判へ（本日の亡者 ${s.dayCaseIds.length}人）` : '本日の亡者なし'),
+    ];
+  } else if (s.phase === 'verdict') {
+    const r = s.verdict.record;
+    body = [
+      el('h2', { text: `判決：${DEST_LABEL[r.destination]}` }),
+      r.random ? el('p', { class: 'mark', text: '時間切れでランダム送り' }) : r.forced ? el('p', { class: 'mark', text: '強制判決' }) : null,
+      interludeNodes(s.verdict.interludes),
+      next('次へ'),
+    ];
+  } else if (s.phase === 'noon') {
+    body = [el('h2', { text: '昼休み' }), interludeNodes(s.noon.interludes), next('午後の裁判へ')];
+  } else if (s.phase === 'night') {
+    const n = s.night;
+    body = [
+      el('h2', { text: `${s.day}日目の夜` }),
+      el('ol', { class: 'verdicts' }, n.records.map((r, i) => el('li', {},
+        el('span', { class: 'who', text: `${caseNo(i)}${pleaOf(r.caseId)}` }),
+        el('b', { text: ` → ${DEST_LABEL[r.destination]}` }),
+        r.random ? el('em', { text: '（ランダム送り）' }) : r.forced ? el('em', { text: '（強制判決）' }) : null))),
+      el('p', { class: 'tally', text: `処理件数 ${n.processed}件（差し戻しは含めない）　稼ぎ +${n.earnings}　残業代 −${n.overtime}　所持金 ${s.money}` }),
+      next('翌朝へ'),
+    ];
+  } else if (s.phase === 'end') {
+    body = [
+      el('h2', { text: 'モックはここまで' }),
+      el('p', { text: `所持金 ${s.money}` }),
+      el('button', { class: 'next', onclick: () => restart(seed) }, '同じシードで最初から'),
+      el('button', { class: 'next', onclick: () => restart(Math.floor(Math.random() * 1e6)) }, '新しいシードで最初から'),
+    ];
+  }
+  ov.hidden = !body;
+  if (body) put(ov, el('div', { class: 'sheet' }, body));
+}
+
+function restart(newSeed) {
+  url.searchParams.set('seed', String(newSeed));
+  location.href = url.toString();
+}
+
+// --- 隅：シードと時間の速さ
+function renderCorner() {
+  $('seed').textContent = `seed ${seed}`;
+  put($('speed'), el('span', { text: '時間の速さ' }), ...[1, 10].map((v) => el('button', {
+    class: speed === v ? 'on' : '', onclick: () => { speed = v; renderCorner(); },
+  }, `×${v}`)));
+}
+
+// --- 時間を進める。線香が燃えるのは裁判パートの間だけ（day.mjs の tick が決める）
+let last = null;
+function frame(now) {
+  if (last !== null) {
+    const dt = Math.min(1, (now - last) / 1000); // 裏に回っていた分は進めない
+    game.tick(dt * speed);
+    if (stateKey() !== ui.lastKey) render();
+    else updateClock();
+  }
+  last = now;
+  requestAnimationFrame(frame);
+}
+
+$('forced-line').textContent = FORCED_LINE;
+renderCorner();
+render();
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
