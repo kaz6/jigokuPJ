@@ -1,16 +1,21 @@
 // 判定まわりの選び方（コード側）。文面はデータ側に置く。DOM には触れない。
 
-export const FORMAT_VERSION = 2;
+export const FORMAT_VERSION = 3;
 
-// 行き先：六道6つ＋差し戻し
+// 行き先：六道6つ＋差し戻し＋地蔵へ（弔いの件だけ）
 export const REALMS = ['heaven', 'human', 'asura', 'animal', 'hungryGhost', 'hell'];
 export const REMAND = 'remand';
-export const DESTINATIONS = [...REALMS, REMAND];
+export const JIZO = 'jizo';
+export const DESTINATIONS = [...REALMS, REMAND, JIZO];
 
 // 評価：六道は proper / wrongful / lenient、差し戻しは retrial / proper（水木のような件）
 export const REALM_VERDICTS = ['proper', 'wrongful', 'lenient'];
 export const REMAND_VERDICTS = ['retrial', 'proper'];
-export const VERDICTS = [...new Set([...REALM_VERDICTS, ...REMAND_VERDICTS])];
+// 地蔵へ：エンマは裁かず地蔵菩薩に託す。評価は proper だけ（妥当・冤罪・見逃しの外）
+export const JIZO_VERDICTS = ['proper'];
+export const VERDICTS = [...new Set([...REALM_VERDICTS, ...REMAND_VERDICTS, ...JIZO_VERDICTS])];
+export const verdictsAllowedFor = (destination) =>
+  destination === REMAND ? REMAND_VERDICTS : destination === JIZO ? JIZO_VERDICTS : REALM_VERDICTS;
 
 export const GAUGE_KEYS = ['kill', 'steal', 'sexual', 'lie', 'intoxicant'];
 export const GAUGE_LEVELS = ['none', 'nearlyNone', 'light', 'lightToMedium', 'medium', 'heavy', 'extreme'];
@@ -19,7 +24,36 @@ export const GAUGE_LEVELS = ['none', 'nearlyNone', 'light', 'lightToMedium', 'me
 export const UPSTREAM_KINGS = ['shinko', 'shoko', 'sotei', 'gokan'];
 
 export const WITNESS_TYPES = ['mosquito', 'human', 'pet', 'horse', 'pig', 'bird'];
-export const CASE_KINDS = ['baseline', 'variant'];
+// 件の種類：平常の亡者／変わり種／弔い（水子など。エンマは裁かず地蔵に託す）
+export const MOURNING = 'mourning';
+export const CASE_KINDS = ['baseline', 'variant', MOURNING];
+
+// --- 件の種類で決まる振る舞い。JSON には書かず、ここで決める
+const isMourning = (caseData) => caseData?.kind === MOURNING;
+
+// 選べる行き先。弔いの件は「地蔵へ」だけ、それ以外は六道＋差し戻し（「地蔵へ」は出さない）
+export function selectableDestinations(caseData) {
+  return isMourning(caseData) ? [JIZO] : [...REALMS, REMAND];
+}
+export const canSelect = (caseData, destination) => selectableDestinations(caseData).includes(destination);
+export function assertSelectable(caseData, destination) {
+  if (!canSelect(caseData, destination)) {
+    throw new Error(`${caseData?.id}（${caseData?.kind}）は行き先 ${destination} を選べない（選べるのは ${selectableDestinations(caseData).join('・')}）`);
+  }
+}
+
+// 線香（質問回数の時間消費）を減らすか。弔いの件では減らさない
+export const consumesIncense = (caseData) => !isMourning(caseData);
+
+// ニュースを出す件か。弔いの件では出さない
+export const producesNews = (caseData) => !isMourning(caseData);
+
+// 判決の記録（DATA_FORMAT「判決の記録」）を一つ作る。選べない行き先は記録させない
+export function makeVerdictRecord({ day, caseData, destination, forced = false, random = false }) {
+  assertSelectable(caseData, destination);
+  if (random && !forced) throw new Error('ランダム送りは強制判決のときだけ');
+  return { formatVersion: FORMAT_VERSION, day, caseId: caseData.id, destination, forced, random };
+}
 
 // 幕間：出るタイミングと、台詞の話し手
 //   nextMorning：翌朝／noon：その日の昼／afterVerdict：その件の判決の直後（行き先に関係なく）
@@ -37,7 +71,10 @@ const isNewsText = (v) => typeof v === 'string' && v.trim() !== '';
 //   { text, from }         ニュースが出る
 //   { none: true, from }   わざと何も起きない（「ニュースなし」の印）
 //   null                   決まらない（書き忘れ。差し戻しは幕間で受けるので null でよい）
+//   弔いの件は常に { none: true, from: 'kind.mourning' }。選べない行き先を渡すと例外
 export function resolveNews(caseData, destination) {
+  assertSelectable(caseData, destination);
+  if (!producesNews(caseData)) return { none: true, from: `kind.${MOURNING}` };
   const pick = (v, from) => {
     if (isNoNews(v)) return { none: true, from };
     if (isNewsText(v)) return { text: v, from };
