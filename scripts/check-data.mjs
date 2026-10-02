@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // data/ の検査。DOM に触れない。問題があれば終了コード 1。
-//   - 全件に共通8問の答えがある
+//   - 全件に共通8問の答えがある（弔いの件は答えと弁明を書かない。どちらも「あー」でコード側が決める）
+//   - 弔いの件：証人は先祖1人、篁の語り（narration）が必須。ほかの件に narration は書かない
+//   - コード側の保証（弔いの件の質問は2回まで・答えは「あー」・2回目のあとに篁の語り）が効いていること
 //   - その件で選べる行き先すべてに評価があり、選べない行き先は書かれていない
 //     （通常の件：六道＋差し戻しの7つ。弔いの件：地蔵へ だけ。src/rules.mjs の selectableDestinations）
 //   - 六道のどの行き先を選んでもニュースが1本に決まる（「ニュースなし」の印も可）
@@ -19,6 +21,8 @@ import {
   GAUGE_KEYS, GAUGE_LEVELS, UPSTREAM_KINGS, WITNESS_TYPES, CASE_KINDS,
   INTERLUDE_TIMINGS, INTERLUDE_SPEAKERS, REFERENCED_INTERLUDES, isNoNews, resolveNews,
   selectableDestinations, makeVerdictRecord,
+  MOURNING_QUESTION_LIMIT, MOURNING_UTTERANCE, MOURNING_WITNESS, NARRATION_SPEAKERS,
+  usesNarration, askQuestion, pleaFor,
 } from '../src/rules.mjs';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -105,13 +109,24 @@ for (const file of files) {
     if (UPSTREAM_KINGS.every((k) => (c.upstream[k] ?? []).length === 0)) warn(where, 'upstream（上流の報告）がどの王の欄も空');
   }
 
-  // 観察・弁明・真相
+  const mourning = c.kind === MOURNING;
+
+  // 観察・弁明・真相（弔いの件の弁明は「あー」でコード側が決めるので書かない）
   if (!isText(c.observation)) err(where, 'observation がない');
-  if (!isText(c.plea)) err(where, 'plea がない');
+  if (mourning) {
+    if (c.plea !== undefined) err(where, `弔いの件の弁明は「${MOURNING_UTTERANCE}」でコード側が決めるので plea は書かない`);
+  } else if (!isText(c.plea)) err(where, 'plea がない');
   if (!Array.isArray(c.truth) || !c.truth.every(isText) || c.truth.length === 0) err(where, 'truth がない');
 
-  // 証人
+  // 証人（弔いの件は先祖1人）
   if (!Array.isArray(c.witnesses) || c.witnesses.length === 0) err(where, 'witnesses がない');
+  else if (mourning) {
+    if (c.witnesses.length !== 1) err(where, `弔いの件の証人は1人だけ（${c.witnesses.length}人）`);
+    const w = c.witnesses[0];
+    if (w.type !== MOURNING_WITNESS.type || w.identity !== MOURNING_WITNESS.identity) {
+      err(where, `弔いの件の証人は ${MOURNING_WITNESS.identity}（type ${MOURNING_WITNESS.type}）（いまは ${w.identity}・${w.type}）`);
+    }
+  }
   for (const [i, w] of (c.witnesses ?? []).entries()) {
     if (!WITNESS_TYPES.includes(w.type)) err(where, `witnesses[${i}].type が不正（${w.type}）`);
     if (!isText(w.identity)) err(where, `witnesses[${i}].identity（正体）がない`);
@@ -127,12 +142,47 @@ for (const file of files) {
     if (!['notOnGauges', 'misc'].includes(key)) err(where, `writerNotes に未知の欄（${key}）`);
   }
 
-  // 検査1：8問すべてに答え
-  for (const qid of questionIds) {
-    if (!isText(c.answers?.[qid])) err(where, `質問 ${qid} の答えがない`);
+  // 篁の語り：弔いの件では必須（話し手は takamura）。ほかの件では出しどころがないので書かない
+  if (usesNarration(c)) {
+    if (!Array.isArray(c.narration) || c.narration.length === 0) err(where, 'narration（篁の語り）がない');
+    for (const [j, l] of (c.narration ?? []).entries()) {
+      if (!NARRATION_SPEAKERS.includes(l?.speaker)) err(where, `narration[${j}].speaker が不正（${l?.speaker}。${NARRATION_SPEAKERS.join('・')} だけ）`);
+      if (!isText(l?.text)) err(where, `narration[${j}].text がない`);
+    }
+  } else if (c.narration !== undefined && CASE_KINDS.includes(c.kind)) {
+    err(where, `kind ${c.kind} の件では篁の語りを出さないので narration は書かない`);
+  }
+
+  // 検査1：8問すべてに答え（弔いの件は書かない）
+  if (mourning) {
+    if (c.answers !== undefined) err(where, `弔いの件の答えは「${MOURNING_UTTERANCE}」でコード側が決めるので answers は書かない`);
+  } else {
+    for (const qid of questionIds) {
+      if (!isText(c.answers?.[qid])) err(where, `質問 ${qid} の答えがない`);
+    }
   }
   for (const qid of Object.keys(c.answers ?? {})) {
     if (!questionIds.includes(qid)) err(where, `未知の質問 id への答え（${qid}）`);
+  }
+
+  // コード側の保証：弔いの件の質問の流れ（2回まで・「あー」・一日の回数から引かない・2回目のあとに篁の語り）
+  if (mourning && questionIds.length > 0) {
+    const fail = (msg) => err(where, `コード側の保証が効いていない：${msg}`);
+    if (pleaFor(c) !== MOURNING_UTTERANCE) fail(`弁明が「${MOURNING_UTTERANCE}」にならない`);
+    let asked = [];
+    for (let i = 1; i <= MOURNING_QUESTION_LIMIT + 1; i++) {
+      const questionId = questionIds[(i - 1) % questionIds.length];
+      let step = null;
+      try { step = askQuestion({ caseData: c, asked, questionId, dailyRemaining: 0 }); } catch { /* 聞けない */ }
+      if (i > MOURNING_QUESTION_LIMIT) { if (step) fail(`${i}回目の質問を受け付けてしまう`); break; }
+      if (!step) { fail(`${i}回目の質問を受け付けない`); break; }
+      if (step.answer !== MOURNING_UTTERANCE) fail(`${i}回目の答えが「${MOURNING_UTTERANCE}」にならない`);
+      if (step.dailyCost !== 0) fail(`${i}回目の質問が一日の回数から引かれる`);
+      if ((i === MOURNING_QUESTION_LIMIT) !== (step.narration === c.narration && step.narration != null)) {
+        fail(`${i}回目の質問のあとの篁の語りが${step.narration ? '出てしまう' : '出ない'}`);
+      }
+      asked = step.asked;
+    }
   }
 
   // 検査2：その件で選べる行き先すべてに評価。選べない行き先の評価は失敗
