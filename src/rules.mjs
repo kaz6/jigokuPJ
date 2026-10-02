@@ -48,6 +48,59 @@ export const consumesIncense = (caseData) => !isMourning(caseData);
 // ニュースを出す件か。弔いの件では出さない
 export const producesNews = (caseData) => !isMourning(caseData);
 
+// --- 質問・弁明の流れ（弔いの件。作者裁定 2026-10-03「弔いの件の流れ」）
+//   質問は2回まで／答えと弁明はすべて「あー」／一日の質問回数から引かない／2回目の質問のあとに篁が語る
+//   「あー」も回数も語りの出どころも台本には書かせない。台本に書くのは篁の語りの文面（narration）だけ
+export const MOURNING_QUESTION_LIMIT = 2;
+export const MOURNING_UTTERANCE = 'あー';
+// 弔いの件の証人：先祖が1人（人の火の玉）。check-data が見る
+export const MOURNING_WITNESS = { type: 'human', identity: '先祖' };
+// 篁の語り（台本の narration）の話し手
+export const NARRATION_SPEAKERS = ['takamura'];
+
+// 件ごとの質問の上限。null は件ごとの上限なし（一日の回数だけで止まる）
+export const questionLimitFor = (caseData) => (isMourning(caseData) ? MOURNING_QUESTION_LIMIT : null);
+// 一日の質問回数（params.questionsPerDay）から引くか
+export const countsTowardDailyQuestions = (caseData) => !isMourning(caseData);
+// 画面に出す弁明と答え
+export const pleaFor = (caseData) => (isMourning(caseData) ? MOURNING_UTTERANCE : caseData.plea);
+export const answerFor = (caseData, questionId) =>
+  isMourning(caseData) ? MOURNING_UTTERANCE : caseData.answers?.[questionId];
+// その件を書くのに台本の narration が要るか（要る件にだけ書く）
+export const usesNarration = (caseData) => isMourning(caseData);
+
+// その件で、いまこの質問を聞けるか。asked：その件で聞いた質問 id の並び（聞いた順、聞き直しも含む）
+//   件ごとの上限は聞き直しも1回に数える（弔いの件の3回目は、同じ質問でも受け付けない）
+//   一日の回数は同じ質問を数えない（params.questionsPerDay の注記）。一日の回数から引かない件では残りを見ない
+//   dailyRemaining：一日の質問回数の残り
+export function canAsk({ caseData, asked = [], questionId, dailyRemaining = Infinity }) {
+  const limit = questionLimitFor(caseData);
+  if (limit !== null && asked.length >= limit) return false;
+  if (!countsTowardDailyQuestions(caseData) || asked.includes(questionId)) return true;
+  return dailyRemaining > 0;
+}
+
+// 質問を一つ聞く。状態は持たず、次の状態を返す（DOM に触れない）
+//   返り値：{ asked, answer, dailyCost, narration }
+//     dailyCost：一日の質問回数から引く数（0 か 1）。同じ質問の聞き直しと、弔いの件は 0
+//     narration：この質問のあとに出す篁の語り（台本の narration）。出さないときは null
+//       弔いの件では、上限（2回目）の質問のあとに出す
+//   聞けない質問（弔いの件の3回目など）は例外
+export function askQuestion({ caseData, asked = [], questionId, dailyRemaining = Infinity }) {
+  if (!canAsk({ caseData, asked, questionId, dailyRemaining })) {
+    throw new Error(`${caseData?.id}（${caseData?.kind}）ではこれ以上質問できない（聞いた回数 ${asked.length}）`);
+  }
+  const repeated = asked.includes(questionId);
+  const next = [...asked, questionId];
+  const reachedLimit = next.length === questionLimitFor(caseData);
+  return {
+    asked: next,
+    answer: answerFor(caseData, questionId),
+    dailyCost: !repeated && countsTowardDailyQuestions(caseData) ? 1 : 0,
+    narration: reachedLimit && usesNarration(caseData) ? caseData.narration : null,
+  };
+}
+
 // 判決の記録（DATA_FORMAT「判決の記録」）を一つ作る。選べない行き先は記録させない
 export function makeVerdictRecord({ day, caseData, destination, forced = false, random = false }) {
   assertSelectable(caseData, destination);
