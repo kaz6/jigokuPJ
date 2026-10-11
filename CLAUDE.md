@@ -6,6 +6,7 @@
 - 企画ページ（作者裁定・台本の正本）：https://app.notion.com/p/3e6a8a5dfd458108821ed0030dd778af
 - 設計原則（末尾の「判定：地獄極楽六道縁途」節）：https://app.notion.com/p/3a2a8a5dfd4581a6a47afb422b7efe94
 - docs/ARCHITECTURE_PRINCIPLES.md・docs/DECISION_LOG.md は上のミラー。食い違ったら Notion が正しい
+  - ただし DECISION_LOG の R-xxx（実装上の判断）はこのリポジトリが原本で、Notion には無い。ミラーなのは D-xxx など作者の裁定の記録
 - data/ の台本の文言も Notion の写し。文言の手直しはしない
 
 ## 判断は持ち込まず、報告する

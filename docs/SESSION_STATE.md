@@ -36,7 +36,7 @@
   - 確認：Chromium（Playwright）で iPad mini の縦（744×1133）・横（1133×744）を表示し、一日目〜二日目の朝まで操作。線香切れ → 強制判決 → 残業代 → 1分でランダム送りも画面で確認。**実機の Safari では確かめていない**
 - 運用（D-046）：PR は draft にしない。check-data がすべて通ったら Claude Code が main にマージしてよい
 - ブランチ：GitHub の既定のブランチは main。main から作業ブランチを切って PR で入れる（main に直接 push しない）
-- 指示文の点検（2026-10-11・横断運用）：CLAUDE.md の事実の訂正は0件で、CLAUDE.md は変えていない。記録は docs/audit/2026-10-11-prompt-audit.md
+- 指示文の点検（2026-10-11・横断運用）：CLAUDE.md の事実の訂正は0件。作者の裁定（A）で、DECISION_LOG の R-xxx は repo が原本という1行を CLAUDE.md に足した。記録は docs/audit/2026-10-11-prompt-audit.md
 - 運用（2026-10-11・横断運用）：`.claude/settings.json` に既定のモデル `sonnet` と相談役 `advisorModel: opus` を設定した（PR #7、マージ `11696f5`）。主を Sonnet にし、計画・原因のはっきりしない失敗・完了の確認だけ Opus に相談させるため。効いているかは新しいセッションで `/advisor`（引数なし）を打って確かめる。戻すときはこの2行を消すか、セッション中に `/model opus` と `/advisor off`
 
 ## 次にやること
