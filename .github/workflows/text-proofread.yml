@@ -35,7 +35,7 @@ permissions:
 env:
   # ▼ 企画ごとに変える所（ここだけ）
   # 文章の場所（カンマ区切り。リポジトリの根からのパスを fnmatch の書き方で：* は / もまたいでどの文字にも合う。例 data/*,index.html）
-  PROOFREAD_PATHS: "data/*,mock/*"
+  PROOFREAD_PATHS: "data/*,src/*,mock/*"
   # true なら直しを変更に入れず、すべて表に回す（文章の正本が Notion など別の場所にある企画）
   PROOFREAD_TABLE_ONLY: "true"
   # ▲ 企画ごとに変える所（ここまで）
