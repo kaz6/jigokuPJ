@@ -51,18 +51,6 @@
       ]
     },
     {
-      "id": "katsudon-chikusan",
-      "timing": "noon",
-      "caseId": "chikusan",
-      "provisional": false,
-      "lines": [
-        {
-          "speaker": "direction",
-          "text": "その日の昼、エンマの机にカツ丼"
-        }
-      ]
-    },
-    {
       "id": "mirror-ringoya",
       "timing": "afterVerdict",
       "caseId": "ringoya",

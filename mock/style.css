@@ -58,6 +58,14 @@ h4 { font-size: 14px; color: var(--dim); margin-top: 10px; }
 .g-level { font-size: 14px; }
 .g-note { grid-column: 1 / -1; font-size: 13px; color: var(--dim); padding-left: 1.6em; }
 
+/* 罪人と証人：後ろ姿のまわりに火の玉が漂う（JG-003） */
+.scene { position: relative; width: 100%; max-width: 320px; height: 230px; margin: 4px auto 0; }
+.scene .back { position: absolute; left: 50%; bottom: 0; margin: 0; transform: translateX(-50%); }
+/* 火の玉は後ろ姿の上を弧に並べる（--slot 番目／全 --n 個）。押せる枠は 44px 以上 */
+.scene .wit { position: absolute; width: 96px; height: 96px; border: none; background: transparent;
+  left: calc((100% - 96px) * (var(--slot) + 1) / (var(--n) + 1)); top: 0; }
+.scene .wit:nth-of-type(even) { top: 44px; }
+.scene .wit:focus-visible { outline: 1px dashed var(--line); }
 /* 罪人：後ろ姿 */
 .back { position: relative; width: 120px; height: 150px; margin: 10px auto 0; }
 .back .head { position: absolute; left: 35px; top: 0; width: 50px; height: 50px; border-radius: 50%; background: #5d5050; }

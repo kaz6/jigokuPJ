@@ -150,7 +150,7 @@ const REMAND_INTERLUDE_BY_CASE = {
 
 // 判決に関係なく、その件を裁いた日に出る幕間
 const CASE_INTERLUDES = {
-  chikusan: ['katsudon-chikusan'],
+  // 家畜産業の人の昼のカツ丼は外した（D-049。保留：トーンが賑やかになったら再検討）
   ringoya: ['mirror-ringoya'],
 };
 

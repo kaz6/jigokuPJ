@@ -15,7 +15,7 @@ const LEVEL_LABEL = {
   none: 'なし', nearlyNone: 'ほぼ空', light: '軽', lightToMedium: '軽〜中',
   medium: '中', heavy: '重い', extreme: '桁違い',
 };
-// 左のアイコン：四人の王（担当の戒をその王の報告と一緒に出す）・罪人・証人
+// 左のアイコン：四人の王（担当の戒をその王の報告と一緒に出す）・罪人と証人（一つの視点。JG-003）
 const KINGS = [
   { id: 'shinko', name: '秦広王', icon: '秦', gauges: ['kill'] },
   { id: 'shoko', name: '初江王', icon: '初', gauges: ['steal'] },
@@ -23,7 +23,7 @@ const KINGS = [
   { id: 'gokan', name: '五官王', icon: '五', gauges: ['lie', 'intoxicant'] },
 ];
 const VIEWS = [...KINGS.map((k) => ({ id: k.id, icon: k.icon, label: k.name })),
-  { id: 'sinner', icon: '罪', label: '罪人' }, { id: 'witness', icon: '証', label: '証人' }];
+  { id: 'sinner', icon: '罪', label: '罪人と証人' }];
 const SPEAKER_LABEL = {
   case: '亡者', enma: 'エンマ', takamura: '篁', jailer: '獄吏（声）', witness: '証人（火の玉）', direction: '',
 };
@@ -135,16 +135,18 @@ function renderCourt() {
       el('h4', { text: '計器' }),
       king.gauges.map((g) => gaugeNode(g, c.gauges[g])),
     );
-  } else if (ui.view === 'sinner') {
-    put(view, el('h3', { text: '罪人' }), el('div', { class: 'back' }, el('div', { class: 'head' }), el('div', { class: 'body' })),
-      el('p', { class: 'hint', text: '（後ろ姿）' }));
   } else {
-    put(view, el('h3', { text: '証人' }),
-      el('div', { class: 'witnesses' }, (c.witnesses ?? []).map((w, i) => el('button', {
-        class: `wit t-${w.type}${w.swarm ? ' swarm' : ''}`, 'aria-label': `証人${i + 1}`,
-        onclick: () => { game.hearWitness(i); renderCourt(); },
-      }, (w.swarm ? [0, 1, 2, 3, 4, 5, 6] : [0]).map((k) => el('i', { class: 'ball', style: `--k:${k}` }))))),
-      el('p', { class: 'hint', text: '火の玉をタップすると証言' }));
+    // 罪人の後ろ姿のまわりに、証人の火の玉が漂う（JG-003：罪人と証人を一つの視点に）
+    const ws = c.witnesses ?? [];
+    put(view, el('h3', { text: '罪人と証人' }),
+      el('div', { class: 'scene' },
+        el('div', { class: 'back' }, el('div', { class: 'head' }), el('div', { class: 'body' })),
+        ws.map((w, i) => el('button', {
+          class: `wit t-${w.type}${w.swarm ? ' swarm' : ''}`, 'aria-label': `証人${i + 1}`,
+          style: `--slot:${i}; --n:${ws.length}`,
+          onclick: () => { game.hearWitness(i); renderCourt(); },
+        }, (w.swarm ? [0, 1, 2, 3, 4, 5, 6] : [0]).map((k) => el('i', { class: 'ball', style: `--k:${k}` }))))),
+      el('p', { class: 'hint', text: ws.length ? '（後ろ姿）　火の玉をタップすると証言' : '（後ろ姿）' }));
   }
   // 右上：エンマの心の声（観察）
   put($('thought'), el('div', { class: 'label', text: 'エンマの心の声' }), el('p', { text: c.observation }));

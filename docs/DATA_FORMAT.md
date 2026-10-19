@@ -252,7 +252,8 @@
 - `interludesFor(判決の記録の並び, 台本)` が出す幕間 id を返す
 - 差し戻し（評価 `retrial`）した件 → 翌日の朝に、件ごとの上書き（`REMAND_INTERLUDE_BY_CASE`）か、なければ共通の既定 `remand-default`
 - 差し戻しが妥当（評価 `proper`）なら再審の幕間は出さない
-- 判決に関係なく、その件を裁いた日に出す幕間（`CASE_INTERLUDES`）。例：家畜産業の人 → 昼のカツ丼／リンゴ屋 → 判決の直後に鏡の場面。日の中のどこで出すかは幕間の `timing`
+- 判決に関係なく、その件を裁いた日に出す幕間（`CASE_INTERLUDES`）。例：リンゴ屋 → 判決の直後に鏡の場面。日の中のどこで出すかは幕間の `timing`
+  - 家畜産業の人の昼のカツ丼は外した（D-049。保留：トーンが賑やかになったら再検討）。いま timing が `noon` の幕間はないので、昼休みの画面は出ない（R-034）
 - 出しどころ未定（`UNSCHEDULED_INTERLUDES`）：今はなし
 - check-data は、コードが名指しする id がデータにあること、データの幕間がコードのどこかから出されることを見る
 
@@ -293,7 +294,7 @@ formatVersion 1 では JSON に入れていなかった記述を、2 で次の�
 | 瀬戸物屋の隠居 | 証人は「ペット＝猫。先に死んでいる」 | `witnesses[0].identity`＝猫。全文は `writerNotes.misc` |
 | 元営業マン | 証人は「擦り寄るつもりの火の玉（ペット＝メダカ。口をぱくぱくさせて寄ってくる）」 | `witnesses[0].identity`＝メダカ。全文は `writerNotes.misc` |
 | 家畜産業の人 | 証人は「火の玉の群れ」 | `witnesses[0].swarm`＝true |
-| 家畜産業の人 | 幕間のオチ「その日の昼、エンマの机にカツ丼」 | `data/interludes.json` の `katsudon-chikusan` |
+| 家畜産業の人 | 幕間のオチ「その日の昼、エンマの机にカツ丼」 | `data/interludes.json` の `katsudon-chikusan` → 2026-10-19 に外した（D-049。保留。文言は Notion に残っている） |
 | 競馬場の主 | 計器に出ないもの「客の破産・一家離散。…」 | `writerNotes.notOnGauges` |
 | 競馬場の主 | エンマの観察の注記「（エンマは常連客）」 | `writerNotes.misc` |
 | リンゴ屋 | 計器に出ないもの「部下を怒鳴ったこと。…」 | `writerNotes.notOnGauges` |

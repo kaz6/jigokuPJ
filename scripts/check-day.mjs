@@ -75,13 +75,11 @@ function expectThrow(fn, msg) {
       expect(s.incenseBurned === burned, '判決の画面では線香が燃えない');
       seenAfter.push(...s.verdict.interludes.map((i) => i.interludeId));
     }
-    if (s.phase === 'noon') {
-      expect(s.caseIndex === 3, `昼休みは3件のあと（${s.caseIndex}）`);
-      seenNoon.push(...s.noon.interludes.map((i) => i.interludeId));
-    }
+    if (s.phase === 'noon') seenNoon.push(`昼休み（${s.noon.interludes.map((i) => i.interludeId)}）`);
     g.advance();
   }
-  expect(seenNoon.join() === 'katsudon-chikusan', `昼休みにカツ丼（${seenNoon}）`);
+  // 昼の幕間（timing: noon）は今ないので、昼休みの画面は出ない（D-049・R-034）
+  expect(seenNoon.length === 0, `昼休みの画面は出ない（${seenNoon}）`);
   expect(seenAfter.join() === 'mirror-ringoya', `判決の直後は鏡の場面だけ（${seenAfter}）`);
   expect(s.night.records.length === 6, '夜：その日の判決が6件');
   expect(s.night.processed === 4, '夜：差し戻しは処理件数に含めない');
